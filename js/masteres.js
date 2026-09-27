@@ -1,144 +1,82 @@
 // ============================================================
-// NÚCLEO — Másteres: listar, reordenar, editar
+// NÚCLEO — Másteres: ordenar, editar, agregar y eliminar
+// Lo que se guarda acá se ve en el home, en la propuesta académica,
+// en el desglose de precios y en el formulario de reseñas.
 // ============================================================
 (function () {
   'use strict';
 
-  const listEl = document.getElementById('masters-list');
-  const template = document.getElementById('master-edit-template');
-  const COLOR_LABEL = { blue: 'Azul', violet: 'Violeta', orange: 'Naranja', pink: 'Rosa', green: 'Verde' };
+  const esc = window.nucleoEsc;
+  const COLORS = [
+    { value: 'accent-1', label: 'Acento 1 (azulado)' },
+    { value: 'accent-2', label: 'Acento 2 (violáceo)' },
+    { value: 'accent-3', label: 'Acento 3 (dorado)' },
+  ];
+  const colorLabel = (token) => (COLORS.find((c) => c.value === token) || { label: 'Según su posición' }).label.replace(/ \(.*\)/, '');
+  let currency = 'USD';
 
-  let masters = [];
-
-  async function loadMasters() {
-    const { data, error } = await supabaseClient
-      .from('masters')
-      .select('*')
-      .order('order_index', { ascending: true });
-
-    if (error) {
-      listEl.innerHTML = '<div class="empty-state">No pudimos cargar los Másteres.</div>';
-      return;
-    }
-    masters = data;
-    render();
-  }
-
-  function render() {
-    if (!masters.length) {
-      listEl.innerHTML = '<div class="empty-state">Todavía no hay Másteres cargados.</div>';
-      return;
-    }
-    listEl.innerHTML = '';
-    masters.forEach((m, i) => {
-      const row = document.createElement('div');
-      row.className = 'data-row';
-      row.style.flexDirection = 'column';
-      row.dataset.id = m.id;
-
-      row.innerHTML = `
-        <div style="display:flex; width:100%; gap:16px; align-items:flex-start;">
-          <div class="data-row-main">
-            <div class="data-row-title">${String(i + 1).padStart(2, '0')} · ${m.name} <span style="color:var(--text-faint); font-weight:600;">— ${COLOR_LABEL[m.color_token] || m.color_token} · USD ${m.price}/año</span></div>
-            <div class="data-row-sub">${m.description}</div>
-            <div class="data-row-meta">${(m.topics || []).length} temas incluidos</div>
-          </div>
-          <div class="data-row-actions">
-            <button class="icon-btn" data-action="up" ${i === 0 ? 'disabled' : ''} title="Subir"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 12V4M4 8l4-4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-            <button class="icon-btn" data-action="down" ${i === masters.length - 1 ? 'disabled' : ''} title="Bajar"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 4v8M4 8l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-            <button class="icon-btn" data-action="edit" title="Editar"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-8 8H3v-3l8-8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
-          </div>
-        </div>
-        <div class="edit-slot"></div>
-      `;
-      listEl.appendChild(row);
+  supabaseClient
+    .from('pricing_plan')
+    .select('currency')
+    .eq('id', 1)
+    .maybeSingle()
+    .then(({ data }) => {
+      if (data && data.currency) currency = data.currency;
     });
-  }
 
-  listEl.addEventListener('click', async (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    const row = btn.closest('.data-row');
-    const id = row.dataset.id;
-    const index = masters.findIndex((m) => m.id === id);
-    const action = btn.dataset.action;
-
-    if (action === 'up' || action === 'down') {
-      const swapWith = action === 'up' ? index - 1 : index + 1;
-      if (swapWith < 0 || swapWith >= masters.length) return;
-      const a = masters[index];
-      const b = masters[swapWith];
-      const tmp = a.order_index;
-      a.order_index = b.order_index;
-      b.order_index = tmp;
-
-      await Promise.all([
-        supabaseClient.from('masters').update({ order_index: a.order_index }).eq('id', a.id),
-        supabaseClient.from('masters').update({ order_index: b.order_index }).eq('id', b.id),
-      ]);
-      masters.sort((x, y) => x.order_index - y.order_index);
-      render();
-      window.nucleoToast('Orden actualizado.');
-      return;
-    }
-
-    if (action === 'edit') {
-      const slot = row.querySelector('.edit-slot');
-      if (slot.children.length) {
-        slot.innerHTML = '';
-        return;
-      }
-      const node = template.content.cloneNode(true);
-      const m = masters[index];
-      node.querySelector('[data-field="name"]').value = m.name;
-      node.querySelector('[data-field="price"]').value = m.price;
-      node.querySelector('[data-field="description"]').value = m.description;
-      node.querySelector('[data-field="topics"]').value = (m.topics || [])
-        .map((t) => (typeof t === 'string' ? t : `${t.name} :: ${t.description || ''}`))
-        .join('\n');
-      node.querySelector('[data-field="color_token"]').value = m.color_token;
-      node.querySelector('[data-action="cancel"]').addEventListener('click', () => {
-        slot.innerHTML = '';
-      });
-      node.querySelector('[data-action="save"]').addEventListener('click', async (ev) => {
-        const saveBtn = ev.target;
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'Guardando…';
-        const name = slot.querySelector('[data-field="name"]').value.trim();
-        const price = Number(slot.querySelector('[data-field="price"]').value) || 0;
-        const description = slot.querySelector('[data-field="description"]').value.trim();
-        const topics = slot
-          .querySelector('[data-field="topics"]')
-          .value.split('\n')
-          .map((line) => line.trim())
-          .filter(Boolean)
-          .map((line) => {
-            const [name, ...rest] = line.split('::');
-            return { name: name.trim(), description: rest.join('::').trim() };
-          });
-        const color_token = slot.querySelector('[data-field="color_token"]').value;
-
-        const { error } = await supabaseClient
-          .from('masters')
-          .update({ name, price, description, topics, color_token, updated_at: new Date().toISOString() })
-          .eq('id', m.id);
-
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'Guardar cambios';
-
-        if (error) {
-          window.nucleoToast('No se pudo guardar. Probá de nuevo.');
-          return;
-        }
-        window.nucleoToast('Máster actualizado.');
-        slot.innerHTML = '';
-        loadMasters();
-      });
-      slot.appendChild(node);
-    }
-  });
-
-  window.nucleoReady.then((session) => {
-    if (session) loadMasters();
+  window.nucleoListEditor({
+    table: 'masters',
+    listEl: document.getElementById('masters-list'),
+    addBtn: document.getElementById('add-master-btn'),
+    itemName: 'Máster',
+    newTitle: 'Máster nuevo',
+    emptyText: 'Todavía no hay Másteres cargados.',
+    savedText: 'Máster guardado. Ya se ve en el sitio.',
+    deletedText: 'Máster eliminado del sitio.',
+    fields: [
+      { name: 'name', label: 'Nombre del Máster', required: true, attrs: 'maxlength="120"', hint: 'Sin la palabra "Máster": el sitio la agrega sola.' },
+      { name: 'price', label: 'Precio individual por año (si se compra por separado)', type: 'number', required: true, attrs: 'min="0" step="1" style="max-width:180px;"' },
+      { name: 'description', label: 'Descripción corta', type: 'textarea', required: true },
+      {
+        name: 'topics',
+        label: 'Temas incluidos',
+        type: 'textarea',
+        attrs: 'style="min-height:140px;" placeholder="Excel :: Desde cero, la base para ordenar y calcular cualquier información."',
+        hint: 'Un tema por renglón. Si querés sumar una descripción, separala del nombre con "::" (dos veces dos puntos).',
+      },
+      {
+        name: 'color_token',
+        label: 'Color de acento',
+        type: 'select',
+        options: COLORS,
+        hint: 'Son 3 colores que rotan: así sumar Másteres nunca obliga a inventar colores nuevos. El verde queda reservado para la marca.',
+      },
+    ],
+    title: (m, i) => `${String(i + 1).padStart(2, '0')} · ${esc(m.name)}`,
+    sub: (m) => esc(m.description),
+    meta: (m) => {
+      const n = (m.topics || []).length;
+      return `${n} ${n === 1 ? 'tema' : 'temas'} · ${esc(currency)} ${esc(m.price)}/año · ${esc(colorLabel(m.color_token))}`;
+    },
+    toForm: (m) =>
+      Object.assign({}, m, {
+        topics: (m.topics || []).map((t) => (typeof t === 'string' ? t : t.description ? `${t.name} :: ${t.description}` : t.name)).join('\n'),
+      }),
+    fromForm: (v) => {
+      const price = Number(v.price);
+      if (!Number.isFinite(price) || price < 0) return { error: { field: 'price', message: 'Poné un precio válido (0 o más).' } };
+      const topics = v.topics
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const [name, ...rest] = line.split('::');
+          return { name: name.trim(), description: rest.join('::').trim() };
+        });
+      return { name: v.name.trim(), price, description: v.description.trim(), topics, color_token: v.color_token };
+    },
+    // El color nuevo sigue la rotación de los 3 acentos.
+    newItem: (items) => ({ name: '', price: '', description: '', topics: [], color_token: COLORS[items.length % COLORS.length].value }),
+    deleteText: (m) => `¿Eliminar el Máster "${m.name}"? Deja de verse en todo el sitio y no se puede deshacer.`,
   });
 })();

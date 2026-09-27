@@ -15,22 +15,22 @@
 </head>
 <body>
 
-<div class="auth-shell">
+<main class="auth-shell">
   <svg class="auth-motif" viewBox="0 0 200 200" fill="none" aria-hidden="true">
     <path d="M20 20 L180 20 L100 90 Z" fill="#12E086" fill-opacity="0.5"/>
     <path d="M20 180 L180 180 L100 110 Z" fill="#12E086" fill-opacity="0.18"/>
   </svg>
 
   <div class="auth-card">
-    <div class="auth-logo"><img src="/assets/logo/logo-icon-green.png" alt="AVA"></div>
+    <div class="auth-logo"><img src="/assets/logo/logo-icon-green.png" alt="AVA" width="240" height="240"></div>
 
     <!-- Vista: login -->
     <div class="auth-view is-active" data-view="login">
       <h1>Núcleo</h1>
-      <p class="body-md">El centro de comando de AVA. Iniciá sesión para administrar el sitio.</p>
+      <p class="body-md">El panel de AVA. Iniciá sesión para administrar el sitio.</p>
 
       <form class="auth-form" id="login-form">
-        <p class="auth-error" id="login-error"></p>
+        <p class="auth-error" id="login-error" role="alert"></p>
         <div class="field">
           <label for="login-email">Email</label>
           <input type="email" id="login-email" required autocomplete="username">
@@ -44,7 +44,6 @@
 
       <div class="auth-links">
         <button type="button" data-show-view="forgot">¿Olvidaste tu contraseña?</button>
-        <button type="button" data-show-view="setup">Primera vez acá</button>
       </div>
     </div>
 
@@ -54,8 +53,8 @@
       <p class="body-md">Te mandamos un link a tu email para elegir una contraseña nueva.</p>
 
       <form class="auth-form" id="forgot-form">
-        <p class="auth-error" id="forgot-error"></p>
-        <p class="auth-success" id="forgot-success">Listo, revisá tu email. El link puede tardar unos minutos en llegar.</p>
+        <p class="auth-error" id="forgot-error" role="alert"></p>
+        <p class="auth-success" id="forgot-success" role="status">Listo, revisá tu email. El link puede tardar unos minutos en llegar.</p>
         <div class="field">
           <label for="forgot-email">Email</label>
           <input type="email" id="forgot-email" required autocomplete="username">
@@ -65,38 +64,11 @@
 
       <div class="auth-links">
         <button type="button" data-show-view="login">← Volver a iniciar sesión</button>
-        <span></span>
-      </div>
-    </div>
-
-    <!-- Vista: alta de la primera cuenta (uso único) -->
-    <div class="auth-view" data-view="setup">
-      <h1>Crear cuenta</h1>
-      <p class="body-md">Esto crea la cuenta de administradora de Núcleo. Usalo solo la primera vez.</p>
-
-      <form class="auth-form" id="setup-form">
-        <p class="auth-error" id="setup-error"></p>
-        <p class="auth-success" id="setup-success">Cuenta creada. Si te pedimos confirmación por email, revisalo antes de iniciar sesión.</p>
-        <div class="field">
-          <label for="setup-email">Email</label>
-          <input type="email" id="setup-email" required autocomplete="username">
-        </div>
-        <div class="field">
-          <label for="setup-password">Contraseña</label>
-          <input type="password" id="setup-password" required minlength="8" autocomplete="new-password">
-          <span class="field-hint">Mínimo 8 caracteres.</span>
-        </div>
-        <button type="submit" class="btn btn-solid" style="width:100%; margin-top:6px;">Crear cuenta de administradora</button>
-      </form>
-
-      <div class="auth-links">
-        <button type="button" data-show-view="login">← Volver a iniciar sesión</button>
-        <span></span>
       </div>
     </div>
 
   </div>
-</div>
+</main>
 
 <script src="/js/supabase-client.js"></script>
 <script src="/js/login.js"></script>

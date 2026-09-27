@@ -1,130 +1,166 @@
 // ============================================================
-// NÚCLEO — Precios: cargar, previsualizar y guardar
-// El precio de cada Máster se edita en Másteres; acá solo se usa
-// para calcular el "total si se compra por separado" en la vista previa.
+// NÚCLEO — Precios: cargar, validar, previsualizar y guardar
+// El precio de cada Máster se edita en Másteres; acá se usa solo para
+// calcular el "total si se compra por separado" de la vista previa.
 // ============================================================
 (function () {
   'use strict';
 
+  const esc = window.nucleoEsc;
+  const $ = (id) => document.getElementById(id);
   const els = {
-    promo: document.getElementById('f-promo'),
-    regular: document.getElementById('f-regular'),
-    guarantee: document.getElementById('f-guarantee'),
-    currency: document.getElementById('f-currency'),
-    showPromo: document.getElementById('f-show-promo'),
-    preview: document.getElementById('preview-stack'),
-    lastSaved: document.getElementById('last-saved'),
+    form: $('pricing-form'),
+    promo: $('f-promo'),
+    promoLabel: $('f-promo-label'),
+    regular: $('f-regular'),
+    regularField: $('f-regular-field'),
+    guarantee: $('f-guarantee'),
+    currency: $('f-currency'),
+    showPromo: $('f-show-promo'),
+    preview: $('preview-stack'),
+    lastSaved: $('last-saved'),
+    save: $('save-btn'),
   };
 
-  let mastersCache = [];
+  let masters = [];
+  let copy = {};
+  let saved = null; // últimos valores guardados, para detectar cambios
 
-  function renderPreview() {
-    const promo = Number(els.promo.value) || 0;
-    const regular = Number(els.regular.value) || 0;
-    const currency = els.currency.value || 'USD';
-    const showPromo = els.showPromo.value === 'true';
-    const total = mastersCache.reduce((sum, m) => sum + Number(m.price || 0), 0);
+  const fmt = (n) => new Intl.NumberFormat('es-AR').format(Number(n) || 0);
+  const text = (key, fallback) => (copy[key] && copy[key].trim() ? copy[key] : fallback);
+  const values = () => ({
+    price_promo: els.promo.value,
+    price_regular: els.regular.value,
+    guarantee_days: els.guarantee.value,
+    currency: els.currency.value.trim().toUpperCase(),
+    show_promo: els.showPromo.value === 'true',
+  });
 
-    let rows = mastersCache
-      .map(
-        (m) => `
-      <div class="value-row">
-        <span class="value-label">Máster ${m.name}</span>
-        <span class="value-dots"></span>
-        <span class="value-amount">${currency} ${m.price}/año</span>
-      </div>`
-      )
-      .join('');
-
-    rows += `
-      <div class="value-row">
-        <span class="value-label">Cursos de regalo con especialistas</span>
-        <span class="value-dots"></span>
-        <span class="value-amount">No se vende por separado</span>
-      </div>
-      <div class="value-row value-row-total">
-        <span class="value-label">Total si se compra por separado</span>
-        <span class="value-dots"></span>
-        <span class="value-amount value-strike">${currency} ${total}/año</span>
-      </div>`;
-
-    if (showPromo) {
-      rows += `
-      <div class="value-row value-row-total">
-        <span class="value-label">Precio de suscripción anual</span>
-        <span class="value-dots"></span>
-        <span class="value-amount value-strike">${currency} ${regular}/año</span>
-      </div>
-      <div class="value-row value-row-final">
-        <span class="value-label">Precio promocional de lanzamiento</span>
-        <span class="value-dots"></span>
-        <span class="value-amount-final">${currency} ${promo}<small>/año</small></span>
-      </div>`;
-    } else {
-      rows += `
-      <div class="value-row value-row-final">
-        <span class="value-label">Precio de suscripción anual</span>
-        <span class="value-dots"></span>
-        <span class="value-amount-final">${currency} ${promo}<small>/año</small></span>
-      </div>`;
-    }
-
-    els.preview.innerHTML = rows;
+  /* ---------- Etiquetas según haya oferta o no ---------- */
+  function syncMode() {
+    const offer = els.showPromo.value === 'true';
+    els.promoLabel.textContent = offer ? 'Precio de oferta (el que se cobra)' : 'Precio anual (el que se cobra)';
+    els.regularField.hidden = !offer;
+    els.regular.required = offer;
   }
 
-  [els.promo, els.regular, els.currency].forEach((el) => el.addEventListener('input', renderPreview));
-  els.showPromo.addEventListener('change', renderPreview);
+  /* ---------- Vista previa con los textos reales del sitio ---------- */
+  function renderPreview() {
+    const v = values();
+    const cur = esc(v.currency || 'USD');
+    const perYear = esc(text('plan_per_year', '/año'));
+    const total = masters.reduce((sum, m) => sum + Number(m.price || 0), 0);
+    const row = (label, amount, cls = '') =>
+      `<div class="value-row ${cls}"><span class="value-label">${label}</span><span class="value-dots" aria-hidden="true"></span>${amount}</div>`;
 
+    let html = masters.map((m) => row(`Máster ${esc(m.name)}`, `<span class="value-amount">${cur} ${fmt(m.price)}${perYear}</span>`)).join('');
+    html += row(esc(text('plan_gifts_label', 'Cursos de regalo con especialistas')), `<span class="value-amount">${esc(text('plan_gifts_value', 'No se vende por separado'))}</span>`);
+    html += row(esc(text('plan_total_label', 'Total si se compra por separado')), `<span class="value-amount value-strike">${cur} ${fmt(total)}${perYear}</span>`, 'value-row-total');
+    if (v.show_promo) {
+      html += row(esc(text('plan_regular_label', 'Precio de suscripción anual')), `<span class="value-amount value-strike">${cur} ${fmt(v.price_regular)}${perYear}</span>`, 'value-row-total');
+      html += row(esc(text('plan_promo_label', 'Precio promocional de lanzamiento')), `<span class="value-amount-final">${cur} ${fmt(v.price_promo)}<small>${perYear}</small></span>`, 'value-row-final');
+    } else {
+      html += row(esc(text('plan_regular_label', 'Precio de suscripción anual')), `<span class="value-amount-final">${cur} ${fmt(v.price_promo)}<small>${perYear}</small></span>`, 'value-row-final');
+    }
+    els.preview.innerHTML = html;
+  }
+
+  /* ---------- Validación ---------- */
+  function setError(input, message) {
+    const err = $(`${input.id}-error`);
+    err.textContent = message || '';
+    err.hidden = !message;
+    if (message) input.setAttribute('aria-invalid', 'true');
+    else input.removeAttribute('aria-invalid');
+  }
+  function validate() {
+    const v = values();
+    const checks = [
+      [els.promo, v.price_promo === '' || Number(v.price_promo) < 0 ? 'Poné un precio válido (0 o más).' : ''],
+      [els.regular, v.show_promo && (v.price_regular === '' || Number(v.price_regular) <= Number(v.price_promo)) ? 'Para mostrar una oferta, el precio regular tiene que ser más alto que el de oferta.' : ''],
+      [els.guarantee, v.guarantee_days === '' || Number(v.guarantee_days) < 0 || !Number.isInteger(Number(v.guarantee_days)) ? 'Poné una cantidad de días válida.' : ''],
+      [els.currency, !/^[A-Z]{3}$/.test(v.currency) ? 'Usá un código de 3 letras, por ejemplo USD.' : ''],
+    ];
+    let first = null;
+    checks.forEach(([input, msg]) => {
+      setError(input, msg);
+      if (msg && !first) first = input;
+    });
+    return first;
+  }
+
+  function onChange() {
+    syncMode();
+    renderPreview();
+    window.nucleoSetDirty('precios', saved !== null && JSON.stringify(values()) !== saved);
+  }
+  els.form.addEventListener('input', onChange);
+  els.showPromo.addEventListener('change', onChange);
+
+  /* ---------- Carga ---------- */
   window.nucleoReady.then(async (session) => {
     if (!session) return;
-
-    const [{ data: pricing, error: pricingError }, { data: masters, error: mastersError }] = await Promise.all([
+    const [pricingRes, mastersRes, copyRes] = await Promise.all([
       supabaseClient.from('pricing_plan').select('*').eq('id', 1).single(),
       supabaseClient.from('masters').select('name, price').order('order_index', { ascending: true }),
+      supabaseClient.from('site_copy').select('key, value').like('key', 'plan_%'),
     ]);
-
-    if (pricingError || !pricing) {
-      window.nucleoToast('No pudimos cargar los precios actuales.');
+    if (pricingRes.error || !pricingRes.data) {
+      window.nucleoToast('No pudimos cargar los precios. Recargá la página para intentar de nuevo.');
+      els.save.disabled = true;
       return;
     }
+    const p = pricingRes.data;
+    masters = mastersRes.error ? [] : mastersRes.data;
+    (copyRes.data || []).forEach((r) => (copy[r.key] = r.value));
 
-    mastersCache = mastersError ? [] : masters;
-
-    els.promo.value = pricing.price_promo;
-    els.regular.value = pricing.price_regular;
-    els.guarantee.value = pricing.guarantee_days;
-    els.currency.value = pricing.currency;
-    els.showPromo.value = pricing.show_promo === false ? 'false' : 'true';
-    els.lastSaved.textContent = 'Última edición: ' + new Date(pricing.updated_at).toLocaleString('es-AR');
+    els.promo.value = p.price_promo;
+    els.regular.value = p.price_regular;
+    els.guarantee.value = p.guarantee_days;
+    els.currency.value = p.currency;
+    els.showPromo.value = p.show_promo === false ? 'false' : 'true';
+    els.lastSaved.textContent = 'Última edición: ' + new Date(p.updated_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' });
+    saved = JSON.stringify(values());
+    syncMode();
     renderPreview();
   });
 
-  document.getElementById('pricing-form').addEventListener('submit', async (e) => {
+  /* ---------- Guardar ---------- */
+  els.form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const btn = document.getElementById('save-btn');
-    btn.disabled = true;
-    btn.textContent = 'Guardando…';
-
-    const { error } = await supabaseClient
-      .from('pricing_plan')
-      .update({
-        price_promo: Number(els.promo.value),
-        price_regular: Number(els.regular.value),
-        guarantee_days: Number(els.guarantee.value),
-        currency: els.currency.value.trim().toUpperCase(),
-        show_promo: els.showPromo.value === 'true',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', 1);
-
-    btn.disabled = false;
-    btn.textContent = 'Guardar cambios';
-
-    if (error) {
-      window.nucleoToast('No se pudo guardar. Probá de nuevo.');
+    const invalid = validate();
+    if (invalid) {
+      invalid.focus();
       return;
     }
-    window.nucleoToast('Precios actualizados. Ya se ven así en el sitio.');
-    els.lastSaved.textContent = 'Última edición: ' + new Date().toLocaleString('es-AR');
+    const v = values();
+    els.save.disabled = true;
+    els.save.textContent = 'Guardando…';
+    const now = new Date().toISOString();
+    const update = {
+      price_promo: Number(v.price_promo),
+      guarantee_days: Number(v.guarantee_days),
+      currency: v.currency,
+      show_promo: v.show_promo,
+      updated_at: now,
+    };
+    // Sin oferta, el precio regular no se usa: se conserva el último cargado.
+    if (v.show_promo) update.price_regular = Number(v.price_regular);
+    let error = null;
+    try {
+      ({ error } = await supabaseClient.from('pricing_plan').update(update).eq('id', 1));
+    } catch (err) {
+      error = err;
+    }
+    els.save.disabled = false;
+    els.save.textContent = 'Guardar cambios';
+    if (error) {
+      window.nucleoToast('No se pudo guardar. Probá de nuevo en un momento.');
+      return;
+    }
+    saved = JSON.stringify(values());
+    window.nucleoSetDirty('precios', false);
+    els.lastSaved.textContent = 'Última edición: ' + new Date(now).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' });
+    window.nucleoToast('Precios guardados. Ya están en el sitio.');
   });
 })();

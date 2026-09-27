@@ -1,55 +1,57 @@
 # Núcleo — Panel de administración de AVA
 
-Panel privado para administrar el sitio institucional de AVA: precios, catálogo de Másteres, mensajes recibidos y algunos textos clave del home. Es una app estática (HTML + CSS + JS, sin build) conectada a Supabase.
+Panel privado para administrar todo el sitio de AVA. Es una app estática (HTML + CSS + JS, sin build) conectada a la misma base de Supabase que el sitio público (proyecto `mryuhzpenzpyhfidwsup`).
 
-## Antes de desplegar: 3 pasos obligatorios
+## Qué se administra
 
-### 1. Restringir quién puede crear cuenta
-
-Ahora mismo, cualquiera que entre a `login.html` y use el botón **"Primera vez acá"** puede crearse una cuenta con acceso total al panel. Es así a propósito, para que vos puedas crear tu primera cuenta sin que yo tenga que manipular la base de datos a mano.
-
-**Ni bien crees tu cuenta, andá a Supabase → tu proyecto → Authentication → Sign In / Providers → Email, y desactivá "Allow new users to sign up".** Así nadie más va a poder registrarse, y la pantalla de "Primera vez acá" queda inofensiva (solo vos vas a tener contraseña).
-
-Proyecto de Supabase: `mryuhzpenzpyhfidwsup` (ya está creado y conectado, no hace falta crear uno nuevo).
-
-### 2. Crear tu cuenta
-
-1. Subí este panel a Netlify (ver más abajo).
-2. Entrá a `login.html` → "Primera vez acá" → cargá tu email y una contraseña de al menos 8 caracteres.
-3. Si Supabase pide confirmación por email, vas a recibir un correo — confirmalo antes de iniciar sesión.
-4. Iniciá sesión normalmente.
-5. Hacé el paso 1 de arriba (desactivar altas nuevas).
-
-### 3. Verificar que el sitio público ve los mismos datos
-
-El sitio institucional (`aprendeconava.com`) ya está conectado a esta misma base de Supabase para leer precios y Másteres, y para guardar los mensajes de contacto y de suscripción. Si editás un precio acá y no lo ves reflejado en el sitio, revisá la consola del navegador ahí — probablemente el script de Supabase no cargó (ver "Notas técnicas" abajo).
-
-## Qué se administra desde acá
-
-| Sección | Qué hace | Dónde impacta |
+| Sección | Qué se edita | Dónde se ve |
 |---|---|---|
-| **Precios** | Precio promocional, precio regular, precio por Máster individual, días de garantía | `aprendeconava.com/suscripcion.html` (desglose de precios y checkout) |
-| **Másteres** | Nombre, descripción, temas incluidos, color de acento y orden de cada Máster | `aprendeconava.com` (home, sección "Elegí tu ruta") |
-| **Mensajes** | Bandeja unificada de leads: formulario de contacto + interés de suscripción | Se generan cuando alguien completa esos formularios en el sitio |
-| **Contenido del sitio** | Título y bajada del hero, primer párrafo de la bio de la fundadora | `aprendeconava.com` (home y sección de fundadora) — **por ahora esto se guarda en la base pero el sitio todavía no lo lee automáticamente; ver Pendientes** |
-| **Ajustes** | Cambiar tu contraseña | — |
+| **Contenido del sitio** | Todos los textos del sitio, por página, con buscador | Todas las páginas |
+| **Mensajes** | Contacto, lista de espera y pedidos de arrepentimiento o baja: leer, notas internas, archivar, responder por email o WhatsApp, confirmar pedidos dentro de las 24 horas, ver si la persona marcó la casilla de privacidad, descargar CSV | Solo en Núcleo |
+| **Reseñas** | Aprobar, quitar del sitio o eliminar | Inicio y Reseñas |
+| **Másteres** | Nombre, descripción, temas, precio, color y orden; agregar y eliminar | Inicio, Propuesta académica, Suscripción y formulario de reseñas |
+| **Precios** | Precio, oferta sí/no, precio tachado, garantía y moneda (con vista previa) | Suscripción y todo texto con `{garantia}` |
+| **Preguntas frecuentes** | Preguntas y respuestas, orden | Suscripción |
+| **WhatsApp** | Números por área (el primero válido es el del botón flotante) | Contacto y botón flotante |
+| **Email** | Direcciones por área (la primera válida es la principal) | Contacto, Privacidad y datos para Google |
+| **Redes** | Nombre y link de cada red, en el orden que quieras | Pie de todas las páginas, Contacto y datos para Google |
+| **Ajustes** | Cambiar la contraseña | — |
 
-## Pendiente / alcance actual (para ser honesta sobre qué falta)
+## Quién puede entrar
 
-- **"Contenido del sitio" no está conectado todavía al HTML del sitio público.** Guarda los textos en la tabla `site_copy` de Supabase, pero `index.html` y `sobre-ava.html` siguen mostrando el texto que está escrito directo en el código. Conectar esto es el próximo paso si te sirve — avisame y lo hacemos.
-- La **propuesta académica detallada** (`propuesta-academica.html`, con la descripción de cada tema dentro de cada Máster) sigue siendo estática. La edición de Másteres desde acá solo actualiza el resumen que aparece en el home. Unificar los dos requeriría rediseñar esa página para que también sea dinámica — es un paso más de trabajo, decime si lo priorizamos.
-- No hay roles ni multi-usuario: es una sola cuenta de administradora.
+Tener una cuenta no alcanza: el panel verifica que la cuenta esté en la tabla `admins`. Una cuenta que no esté ahí sale automáticamente con el aviso "Esa cuenta no tiene permiso para entrar a Núcleo". Hoy la única administradora es `ilearnwithava@gmail.com`.
 
-## Cómo subirlo (GitHub drag-and-drop + Netlify)
+El panel ya no tiene pantalla para crear cuentas. Para que tampoco se puedan crear por fuera, en Supabase: **Authentication → Sign In / Providers → desactivá "Allow new users to sign up"**. Con eso, solo las cuentas existentes pueden iniciar sesión.
 
-Igual que el sitio principal:
-1. Repositorio nuevo en GitHub → "uploading an existing file" → arrastrá todo el contenido de esta carpeta.
-2. Netlify → "Add new site" → conectá el repo. Build command vacío, publish directory `.`.
-3. Sugerencia: usá un subdominio propio, por ejemplo `admin.aprendeconava.com`, apuntándolo a este sitio de Netlify (separado del sitio institucional).
-4. Google no debería indexar esto — ya incluí `<meta name="robots" content="noindex, nofollow">` en todas las páginas, pero si querés blindarlo más, poné el sitio de Netlify en "Password protection" (disponible en algunos planes) además del login propio.
+## Recuperar la contraseña
 
-## Notas técnicas
+"¿Olvidaste tu contraseña?" manda un email con un link a `reset-password.html`. Si el link te lleva a otra dirección, agregá `https://TU-DIRECCION-DE-NUCLEO/reset-password.html` en Supabase → **Authentication → URL Configuration → Redirect URLs**.
 
-- Usa el cliente de Supabase vía CDN (`unpkg.com/@supabase/supabase-js@2`). Esto requiere que el navegador de quien lo use tenga acceso normal a internet — no debería ser un problema en el uso real, pero **si alguna vez ves que los datos no cargan, lo primero es revisar la consola del navegador por errores de red**.
-- La clave pública de Supabase (`anon key`) está a la vista en `js/supabase-client.js` a propósito: es pública por diseño en Supabase. La seguridad real está en las políticas de RLS (Row Level Security) configuradas en la base: cualquiera puede leer precios/Másteres y crear un mensaje, pero solo una cuenta autenticada puede editar o borrar algo.
-- Recuperar contraseña ("¿Olvidaste tu contraseña?") depende de que Supabase tenga configurado el envío de emails. Por defecto viene activo con un remitente genérico de Supabase; si querés que los emails salgan de tu propio dominio, hay que configurar SMTP propio en el proyecto de Supabase (Settings → Auth → SMTP Settings).
+## Cómo subirlo (GitHub + Netlify)
+
+1. En el repositorio de GitHub de Núcleo, reemplazá los archivos por el contenido de esta carpeta (lo de adentro, no la carpeta).
+2. Netlify publica solo. Build command vacío, publish directory `.`.
+3. Subir una versión nueva no toca nada de lo que editaste: todo vive en la base.
+
+## Seguridad
+
+- `netlify.toml` le pide a Google que no indexe el panel y limita el código que el navegador acepta (Supabase, Google Fonts y el CDN de la librería). `README.md` no se publica.
+- La clave pública de Supabase está a la vista en `js/supabase-client.js` a propósito: es pública por diseño. Lo que protege los datos son las reglas de la base: el público solo puede leer el contenido y crear mensajes o reseñas pendientes; leer mensajes y editar cualquier cosa queda para la cuenta administradora.
+- Todo lo que llega de formularios públicos se muestra escapado (nadie puede meter código en el panel) y el CSV protege las celdas que Excel podría interpretar como fórmulas.
+
+## Archivos
+
+```
+/
+├── index.html · login.html · reset-password.html · 404.html
+├── panel.html · contenido.html · mensajes.html · resenas.html
+├── masteres.html · precios.html · faq.html · whatsapp.html · email.html · redes.html · ajustes.html
+├── css/base.css      Compartido con el sitio (colores, tipografía, botones)
+├── css/nucleo.css    Estructura y componentes del panel
+└── js/
+    ├── supabase-client.js · guard.js · main.js   Conexión, permiso de admin, menú y avisos
+    ├── copy-fields.js     Lista de todos los textos editables del sitio (claves de site_copy)
+    ├── contenido.js       Editor de textos
+    ├── list-editor.js     Editor compartido de Másteres, preguntas, WhatsApp, Email y Redes
+    └── (un archivo por sección)
+```

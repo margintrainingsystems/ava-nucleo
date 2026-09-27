@@ -15,13 +15,12 @@
   --text-faint:    #82858E;
 
   --green:         #12E086;
-  --green-dim:     #0FB874;
   --green-ink:     #06341F; /* texto sobre verde */
 
-  --blue:          #2E7CF6;   /* Datos y Análisis */
-  --violet:        #6E4FFF;   /* IA Aplicada */
-  --orange:        #FF7A29;   /* Programación (reservado) */
-  --pink:          #FF4D94;   /* Habilidades (reservado) */
+  /* --- Acentos de categoría: un set fijo de 3 que rota, no uno nuevo por cada Máster que se sume --- */
+  --accent-1:      #4D8AFF;   /* azulado */
+  --accent-2:      #9B8CFF;   /* violáceo */
+  --accent-3:      #E0A458;   /* dorado/cálido */
 
   --white:         #FFFFFF;
 
@@ -49,6 +48,7 @@
 
 html{
   scroll-behavior: smooth;
+  scroll-padding-top: 96px; /* los anclas (#lista-de-espera) no quedan tapadas por el menú fijo */
   -webkit-text-size-adjust: 100%;
 }
 
@@ -63,7 +63,8 @@ body{
   overflow-x: hidden;
 }
 
-img{ max-width:100%; display:block; }
+img{ max-width:100%; height:auto; display:block; }
+[hidden]{ display:none !important; }
 a{ color: inherit; text-decoration: none; }
 button{ font-family: inherit; }
 
@@ -91,8 +92,6 @@ p{ margin: 0; }
   padding-left: var(--pad);
   padding-right: var(--pad);
 }
-
-.eyebrow-none{ display:none; } /* recordatorio: no usamos eyebrows decorativos */
 
 /* --- Tipografía de escala --- */
 .h-display{
@@ -149,6 +148,11 @@ p{ margin: 0; }
   white-space: nowrap;
 }
 .btn:active{ transform: scale(0.97); }
+/* Los textos de los botones se editan desde Núcleo: si uno largo no entra
+   en pantallas chicas, baja de renglón en vez de cortarse. */
+@media (max-width: 560px){
+  .btn{ white-space: normal; text-align: center; max-width: 100%; }
+}
 
 .btn-solid{
   background: var(--green);
@@ -181,21 +185,22 @@ section{ position: relative; }
 .section-border-t{ border-top: 1px solid var(--line-soft); }
 
 /* --- Utilidades --- */
-.stack-xs > * + *{ margin-top: 8px; }
 .stack-sm > * + *{ margin-top: 16px; }
 .stack-md > * + *{ margin-top: 28px; }
 .stack-lg > * + *{ margin-top: 48px; }
 
-.reveal{
-  opacity: 0;
-  transform: translateY(28px);
-  transition: opacity var(--slow) var(--ease), transform var(--slow) var(--ease);
+/* Solo se oculta para animar si hay JavaScript: sin JS, el contenido se ve igual. */
+@media (scripting: enabled){
+  .reveal{
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity var(--slow) var(--ease), transform var(--slow) var(--ease);
+  }
+  .reveal.is-visible{
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.reveal.is-visible{
-  opacity: 1;
-  transform: translateY(0);
-}
-.reveal-stagger > *{ transition-delay: calc(var(--i, 0) * 90ms); }
 
 .visually-hidden{
   position:absolute; width:1px; height:1px; padding:0; margin:-1px;

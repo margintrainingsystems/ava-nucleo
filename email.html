@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mensajes | Núcleo — AVA</title>
+<title>Email | Núcleo — AVA</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,32 +47,19 @@
     <header class="topbar">
       <div class="topbar-title">
         <button type="button" class="sidebar-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar"><svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 5h14M2 9h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
-        <h1>Mensajes</h1>
+        <h1>Email</h1>
       </div>
       <div class="account-chip"><span class="account-dot" data-account-initial aria-hidden="true">·</span><span data-account-email>—</span></div>
     </header>
 
     <main class="main-content" id="contenido-principal">
-      <p class="body-lg" style="margin-bottom:24px;">Acá llegan los mensajes de contacto, las personas que se anotan en la lista de espera y los pedidos de arrepentimiento o baja. Estos pedidos se confirman por email dentro de las 24 horas: el botón "Enviar confirmación por email" deja el mensaje redactado con el código. Al abrir un mensaje, queda marcado como leído.</p>
-
-      <div class="list-toolbar">
-        <div class="tabs" id="source-tabs" role="group" aria-label="Qué mensajes ver">
-          <button type="button" data-source="todos" aria-pressed="true">Todos<span class="tab-count" data-count="todos"></span></button>
-          <button type="button" data-source="contacto" aria-pressed="false">Contacto<span class="tab-count" data-count="contacto"></span></button>
-          <button type="button" data-source="suscripcion" aria-pressed="false">Lista de espera<span class="tab-count" data-count="suscripcion"></span></button>
-          <button type="button" data-source="arrepentimiento" aria-pressed="false">Arrepentimiento<span class="tab-count" data-count="arrepentimiento"></span></button>
-          <button type="button" data-source="baja" aria-pressed="false">Baja<span class="tab-count" data-count="baja"></span></button>
-        </div>
-        <div class="list-toolbar-actions">
-          <label class="check-inline"><input type="checkbox" id="show-archived"> Mostrar archivados</label>
-          <button type="button" class="btn btn-outline btn-sm" id="export-btn">Descargar lo que se ve (CSV)</button>
-        </div>
-      </div>
+      <p class="body-lg" style="margin-bottom:28px;">Cada dirección aparece en la página de Contacto, con su área. La primera de la lista es el email principal: es la que figura en Privacidad y en los datos del sitio para Google.</p>
 
       <div class="panel">
-        <div class="data-list" id="leads-list">
-          <div class="empty-state">Cargando mensajes…</div>
+        <div class="data-list" id="email-list">
+          <div class="empty-state">Cargando direcciones…</div>
         </div>
+        <button type="button" class="btn btn-outline" id="add-area-btn" style="margin-top:20px;">+ Agregar área</button>
       </div>
     </main>
   </div>
@@ -80,6 +67,7 @@
 
 
 <script src="/js/main.js"></script>
-<script src="/js/mensajes.js"></script>
+<script src="/js/list-editor.js"></script>
+<script src="/js/email-admin.js"></script>
 </body>
 </html>
