@@ -169,6 +169,7 @@ window.NUCLEO_COPY_FIELDS = [
   {"key": "legal_footer", "group": "Menú y pie de página", "section": "Pie de página", "label": "Leyenda legal (Ley 25.326)", "type": "text", "where": "Todas las páginas"},
   {"key": "consent_label", "group": "Textos generales", "section": "Formularios", "label": "Casilla de la Política de privacidad (contacto, lista de espera y reseñas)", "type": "text", "required": true, "where": "Contacto, Suscripción, Reseñas"},
   {"key": "consent_link", "group": "Textos generales", "section": "Formularios", "label": "Link a la Política de privacidad (al lado de la casilla y del aviso)", "type": "line", "required": true, "where": "Contacto, Suscripción, Reseñas, Arrepentimiento, Baja"},
+  {"key": "publish_consent_label", "group": "Suscripción", "section": "Lista de espera", "label": "Casilla opcional: autorización para publicar el nombre si gana una beca", "type": "text", "required": true},
   {"key": "form_sending", "group": "Textos generales", "section": "Formularios", "label": "Botón mientras se envía", "type": "line", "required": true},
   {"key": "campus_url", "group": "Textos generales", "section": "Campus", "label": "Link del Campus (vacío = todavía no abrió)", "type": "line"},
   {"key": "campus_closed", "group": "Textos generales", "section": "Campus", "label": "Aviso mientras el Campus no abrió", "type": "text"},
