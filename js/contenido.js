@@ -15,6 +15,7 @@
     Inicio: '/', 'Sobre AVA': '/sobre-ava', 'Propuesta académica': '/propuesta-academica',
     Suscripción: '/suscripcion', Reseñas: '/resenas', Contacto: '/contacto',
     Privacidad: '/privacidad', 'Términos y condiciones': '/terminos', 'Menú y pie de página': '/',
+    'Arrepentimiento y baja': '/arrepentimiento',
   };
   // Campos que tienen que ser un link completo (o quedar vacíos).
   const URL_KEYS = new Set(['campus_url']);
@@ -182,15 +183,18 @@
     const input = inputFor(key);
     const err = document.getElementById(`cf-${key}-error`);
     input.setAttribute('aria-invalid', message ? 'true' : 'false');
+    // Conjunto de ids: el del error se agrega una sola vez y se saca del todo.
+    const ids = new Set((input.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean));
+    ids.delete(`cf-${key}-error`);
     if (message) {
       err.textContent = message;
       err.hidden = false;
-      input.setAttribute('aria-describedby', [`cf-${key}-error`, input.getAttribute('aria-describedby') || ''].join(' ').trim());
     } else {
       err.hidden = true;
-      input.setAttribute('aria-describedby', (input.getAttribute('aria-describedby') || '').replace(`cf-${key}-error`, '').trim());
-      if (!input.getAttribute('aria-describedby')) input.removeAttribute('aria-describedby');
     }
+    const list = message ? [`cf-${key}-error`, ...ids] : [...ids];
+    if (list.length) input.setAttribute('aria-describedby', list.join(' '));
+    else input.removeAttribute('aria-describedby');
   }
 
   function validate(keys) {

@@ -13,6 +13,15 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // La dirección de Netlify sigue funcionando aunque se conecte el dominio propio.
 const NUCLEO_SITE_URL = 'https://aprendeconava.netlify.app';
 
+// Editar o borrar con .select('id') y pasar la respuesta por acá: si las
+// reglas de la base no dejaron tocar la fila (sesión vencida, fila borrada),
+// Supabase no da error pero no cambia nada; así se avisa en vez de mostrar "guardado".
+window.nucleoRows = function (res) {
+  if (res.error) return res;
+  if (!res.data || !res.data.length) return { data: res.data, error: { message: 'No se modificó ninguna fila' } };
+  return res;
+};
+
 let supabaseClient;
 try {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

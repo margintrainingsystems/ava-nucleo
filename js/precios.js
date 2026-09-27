@@ -148,7 +148,7 @@
     if (v.show_promo) update.price_regular = Number(v.price_regular);
     let error = null;
     try {
-      ({ error } = await supabaseClient.from('pricing_plan').update(update).eq('id', 1));
+      ({ error } = window.nucleoRows(await supabaseClient.from('pricing_plan').update(update).eq('id', 1).select('id')));
     } catch (err) {
       error = err;
     }

@@ -22,6 +22,10 @@
 
   const fullName = (l) => `${l.name || ''} ${l.last_name || ''}`.trim() || 'Sin nombre';
   const digits = (s) => String(s || '').replace(/\D/g, '');
+  // Los emails vienen de formularios públicos: solo se arma un link si tiene
+  // forma de email y sin caracteres que permitan agregar asunto, copias o cuerpo.
+  const SAFE_EMAIL = /^[^\s@?&#%<>"',;:()\[\]\\]+@[^\s@?&#%<>"',;:()\[\]\\]+\.[^\s@?&#%<>"',;:()\[\]\\]+$/;
+  const mailHref = (email, query) => (SAFE_EMAIL.test(email || '') ? `mailto:${email}${query ? '?' + query : ''}` : null);
   const fmtDate = (iso) =>
     new Date(iso).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
@@ -66,7 +70,7 @@
         ? 'Vamos a gestionar la devolución y te avisamos cuando esté hecha.\n\n'
         : 'Tu suscripción no se va a renovar y mantenés el acceso hasta el final del año contratado.\n\n') +
       'Cualquier duda, respondé este email.\n\nAVA';
-    return `mailto:${l.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    return mailHref(l.email, `subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
   }
 
   function detailHTML(l) {
@@ -75,7 +79,7 @@
     const request = isRequest(l);
     const rows = [
       request ? ['Código', `<strong>${esc(l.request_code)}</strong>`] : null,
-      ['Email', `<a href="mailto:${esc(l.email)}">${esc(l.email)}</a>`],
+      ['Email', mailHref(l.email) ? `<a href="${esc(mailHref(l.email))}">${esc(l.email)}</a>` : `${esc(l.email)} <span class="field-optional">(dirección inválida: revisala antes de escribir)</span>`],
       l.phone ? ['Teléfono', esc(l.phone)] : null,
       l.country ? ['País', esc(l.country)] : null,
       l.motivo ? [request ? 'Operación' : 'Motivo', esc(l.motivo)] : null,
@@ -85,7 +89,7 @@
     ].filter(Boolean);
     const emptyMessage = request
       ? `Pedido de ${REQUEST_NAME[l.source]} (sin comentario).`
-      : 'Se anotó en la lista de espera (no escribió un mensaje).';
+      : l.source === 'suscripcion' ? 'Se anotó en la lista de espera (no escribió un mensaje).' : 'Sin mensaje.';
     return `
       <p class="lead-message">${l.message ? esc(l.message) : emptyMessage}</p>
       <dl class="lead-data">${rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
@@ -97,9 +101,9 @@
       <div class="edit-actions">
         ${
           request
-            ? `<a class="btn btn-solid btn-sm" href="${esc(confirmationMail(l))}">Enviar confirmación por email</a>
+            ? `${confirmationMail(l) ? `<a class="btn btn-solid btn-sm" href="${esc(confirmationMail(l))}">Enviar confirmación por email</a>` : ''}
                ${l.confirmed_at ? '' : '<button type="button" class="btn btn-outline btn-sm" data-action="confirm">Marcar como confirmado</button>'}`
-            : `<a class="btn btn-solid btn-sm" href="mailto:${esc(l.email)}?subject=${encodeURIComponent(subject)}">Responder por email</a>`
+            : mailHref(l.email) ? `<a class="btn btn-solid btn-sm" href="${esc(mailHref(l.email, `subject=${encodeURIComponent(subject)}`))}">Responder por email</a>` : ''
         }
         ${phone.length >= 8 ? `<a class="btn btn-outline btn-sm" href="https://wa.me/${phone}" target="_blank" rel="noopener">Escribir por WhatsApp</a>` : ''}
         <button type="button" class="btn btn-ghost btn-sm" data-action="unread">Marcar como no leído</button>
@@ -148,7 +152,7 @@
   async function setStatus(l, status) {
     const previous = l.status;
     l.status = status;
-    const { error } = await supabaseClient.from('leads').update({ status }).eq('id', l.id);
+    const { error } = window.nucleoRows(await supabaseClient.from('leads').update({ status }).eq('id', l.id).select('id'));
     if (error) {
       l.status = previous;
       window.nucleoToast('No se pudo actualizar el mensaje. Probá de nuevo.');
@@ -169,15 +173,34 @@
     render();
   }
 
+  // Notas escritas y sin guardar dentro de scope: se pregunta antes de perderlas.
+  function discardNotesOk(scope) {
+    const dirty = [...scope.querySelectorAll('[data-notes]')].filter((t) => {
+      const l = leads.find((x) => String(x.id) === t.closest('.lead-row').dataset.id);
+      return l && t.value.trim() !== (l.notes || '');
+    });
+    if (!dirty.length) return true;
+    if (!window.confirm('Tenés una nota sin guardar. ¿Descartarla?')) return false;
+    dirty.forEach((t) => window.nucleoSetDirty('notes-' + t.closest('.lead-row').dataset.id, false));
+    return true;
+  }
+
   /* ---------- Eventos ---------- */
   tabsEl.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-source]');
     if (!btn) return;
+    if (!discardNotesOk(listEl)) return;
     source = btn.dataset.source;
     tabsEl.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
     render();
   });
-  archivedEl.addEventListener('change', render);
+  archivedEl.addEventListener('change', () => {
+    if (!discardNotesOk(listEl)) {
+      archivedEl.checked = !archivedEl.checked;
+      return;
+    }
+    render();
+  });
 
   listEl.addEventListener('click', async (e) => {
     const row = e.target.closest('.lead-row');
@@ -190,6 +213,7 @@
       const open = toggle.getAttribute('aria-expanded') === 'true';
       toggle.setAttribute('aria-expanded', String(!open));
       if (open) {
+        if (!discardNotesOk(detail)) return toggle.setAttribute('aria-expanded', 'true');
         detail.hidden = true;
         detail.innerHTML = '';
         return;
@@ -207,7 +231,7 @@
     if (action.dataset.action === 'save-notes') {
       const notes = detail.querySelector('[data-notes]').value.trim();
       action.disabled = true;
-      const { error } = await supabaseClient.from('leads').update({ notes: notes || null }).eq('id', l.id);
+      const { error } = window.nucleoRows(await supabaseClient.from('leads').update({ notes: notes || null }).eq('id', l.id).select('id'));
       action.disabled = false;
       if (error) return window.nucleoToast('No se pudo guardar la nota. Probá de nuevo.');
       l.notes = notes || null;
@@ -219,14 +243,17 @@
     if (action.dataset.action === 'confirm') {
       action.disabled = true;
       const now = new Date().toISOString();
-      const { error } = await supabaseClient.from('leads').update({ confirmed_at: now }).eq('id', l.id);
+      const { error } = window.nucleoRows(await supabaseClient.from('leads').update({ confirmed_at: now }).eq('id', l.id).select('id'));
       if (error) {
         action.disabled = false;
         return window.nucleoToast('No se pudo marcar como confirmado. Probá de nuevo.');
       }
       l.confirmed_at = now;
       refreshRow(row, l);
-      detail.innerHTML = detailHTML(l);
+      // Solo se actualiza el plazo: la nota que se esté escribiendo no se pierde.
+      const due = detail.querySelector('.lead-data .request-due, .lead-data .request-late');
+      if (due) due.outerHTML = requestStatus(l);
+      action.remove();
       window.nucleoToast('Pedido marcado como confirmado.');
       return;
     }
@@ -241,6 +268,7 @@
 
     if (action.dataset.action === 'archive') {
       const archiving = l.status !== 'archivado';
+      if (archiving && !archivedEl.checked && !discardNotesOk(row)) return;
       if (!(await setStatus(l, archiving ? 'archivado' : 'leido'))) return;
       window.nucleoToast(archiving ? 'Archivado.' : 'Desarchivado.');
       if (archiving && !archivedEl.checked) {
@@ -255,12 +283,15 @@
 
     if (action.dataset.action === 'delete') {
       if (!window.confirm(`¿Eliminar el mensaje de ${fullName(l)}? No se puede deshacer.`)) return;
-      const { error } = await supabaseClient.from('leads').delete().eq('id', l.id);
+      const { error } = window.nucleoRows(await supabaseClient.from('leads').delete().eq('id', l.id).select('id'));
       if (error) return window.nucleoToast('No se pudo eliminar. Probá de nuevo.');
       leads = leads.filter((x) => x.id !== l.id);
+      window.nucleoSetDirty('notes-' + l.id, false);
       window.nucleoRefreshBadges();
       window.nucleoToast('Mensaje eliminado.');
-      render();
+      row.remove();
+      updateCounts();
+      if (!listEl.querySelector('.lead-row')) render();
     }
   });
 
@@ -281,7 +312,7 @@
     if (!rows.length) return window.nucleoToast('No hay nada para descargar con estos filtros.');
     const cell = (v) => {
       let s = String(v == null ? '' : v);
-      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+      if (/^[=+\-@\t\r]/.test(s) && !/^\+[\d\s()-]+$/.test(s)) s = "'" + s;
       return `"${s.replace(/"/g, '""')}"`;
     };
     const header = ['Fecha', 'Tipo', 'Código', 'Nombre', 'Apellido', 'Email', 'Teléfono', 'País', 'Motivo u operación', 'Mensaje', 'Estado', 'Confirmado', 'Aceptó privacidad', 'Notas'];

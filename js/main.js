@@ -80,7 +80,18 @@
   /* ---------- Cerrar sesión ---------- */
   document.querySelectorAll('[data-logout]').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      if (typeof supabaseClient !== 'undefined') await supabaseClient.auth.signOut();
+      // Sin conexión, signOut puede fallar: igual se borra la sesión guardada
+      // en este navegador para que "Cerrar sesión" siempre funcione.
+      try {
+        if (typeof supabaseClient !== 'undefined') await supabaseClient.auth.signOut({ scope: 'local' });
+      } catch (e) {
+        /* se limpia abajo */
+      }
+      try {
+        Object.keys(localStorage).filter((k) => k.startsWith('sb-')).forEach((k) => localStorage.removeItem(k));
+      } catch (e) {
+        /* almacenamiento bloqueado: no hay sesión guardada que borrar */
+      }
       window.location.replace('/login.html');
     });
   });

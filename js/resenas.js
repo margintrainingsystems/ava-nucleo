@@ -40,7 +40,7 @@
           <div class="data-row-main">
             <div class="data-row-title">${who}</div>
             <div class="data-row-sub review-quote">"${esc(t.testimonial)}"</div>
-            <div class="data-row-meta">${masters} · ${date}</div>
+            <div class="data-row-meta">${masters} · ${date} · ${t.privacy_consent ? 'Aceptó la Política de privacidad' : '<span class="row-warning">Sin casilla de privacidad</span> (llegó antes de que existiera)'}</div>
           </div>
           <div class="data-row-actions">
             ${current !== 'aprobado' ? `<button type="button" class="btn btn-solid btn-sm" data-action="aprobado" aria-label="Aprobar la reseña de ${who}">Aprobar</button>` : ''}
@@ -83,7 +83,7 @@
         btn.disabled = false;
         return;
       }
-      const { error } = await supabaseClient.from('testimonials').delete().eq('id', item.id);
+      const { error } = window.nucleoRows(await supabaseClient.from('testimonials').delete().eq('id', item.id).select('id'));
       if (error) {
         btn.disabled = false;
         return window.nucleoToast('No se pudo eliminar. Probá de nuevo.');
@@ -91,7 +91,7 @@
       items = items.filter((t) => t.id !== item.id);
       window.nucleoToast('Reseña eliminada.');
     } else {
-      const { error } = await supabaseClient.from('testimonials').update({ status: action }).eq('id', item.id);
+      const { error } = window.nucleoRows(await supabaseClient.from('testimonials').update({ status: action }).eq('id', item.id).select('id'));
       if (error) {
         btn.disabled = false;
         return window.nucleoToast('No se pudo actualizar la reseña. Probá de nuevo.');

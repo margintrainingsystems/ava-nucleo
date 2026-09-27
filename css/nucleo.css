@@ -440,4 +440,16 @@ body.auth-pending{ opacity: 0; }
 .request-due{ color: #ffb86b; font-weight:700; }
 .request-late{ color: #ff8b8b; font-weight:700; }
 .request-ok{ color: var(--green); font-weight:700; }
+@media (max-width:560px){
+  /* Reseñas: el texto ocupa todo el ancho y los botones bajan abajo. */
+  #testimonials-list .data-row{ flex-direction: column; align-items: stretch; }
+  #testimonials-list .data-row-actions{ flex-wrap: wrap; }
+  /* Vista previa de Precios: los importes no se cortan. */
+  .value-row{ flex-wrap: wrap; }
+  .value-label{ white-space: normal; }
+  .value-dots{ display: none; }
+  .value-amount, .value-amount-final{ margin-left: auto; }
+  /* Aviso flotante: casi todo el ancho de la pantalla, no media pantalla. */
+  .toast{ width: max-content; max-width: calc(100vw - 32px); text-align: center; border-radius: 16px; }
+}
 .tab-error{ display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; margin-left:6px; border-radius:50%; background:#ff8b8b; color:#16171B; font-size:0.7rem; font-weight:800; }

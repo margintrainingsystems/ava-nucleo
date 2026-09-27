@@ -43,8 +43,15 @@
       render();
     }
 
+    // Nombre del ítem en texto plano, para que cada botón diga de qué fila es.
+    function plainTitle(item, i) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = cfg.title(item, i);
+      return tmp.textContent.replace(/\s+/g, ' ').trim();
+    }
+
     function rowActions(item, i) {
-      const name = esc(cfg.itemName);
+      const name = esc(`${cfg.itemName}: ${plainTitle(item, i)}`);
       return `
         <button type="button" class="icon-btn" data-action="up" ${i === 0 ? 'disabled' : ''} aria-label="Subir ${name}">${icon('up')}</button>
         <button type="button" class="icon-btn" data-action="down" ${i === items.length - 1 ? 'disabled' : ''} aria-label="Bajar ${name}">${icon('down')}</button>
@@ -134,6 +141,15 @@
       window.nucleoSetDirty(cfg.table, dirty);
     }
 
+    // Cambios sin guardar en otro ítem abierto: se pregunta antes de rehacer la lista.
+    function othersDirtyOk(exceptId) {
+      let dirty = false;
+      openEditors.forEach(({ initial, form }, id) => {
+        if (id !== exceptId && JSON.stringify(readForm(form)) !== initial) dirty = true;
+      });
+      return !dirty || window.confirm('Hay cambios sin guardar en otro ítem. Si seguís, se pierden. ¿Seguir?');
+    }
+
     function closeEditor(row) {
       const id = row.dataset.id;
       openEditors.delete(id);
@@ -174,6 +190,7 @@
         const record = cfg.fromForm(values, item);
         if (record.error) return showFieldError(form, record.error.field, record.error.message);
         showFieldError(form, null);
+        if (!othersDirtyOk(id)) return;
 
         const btn = form.querySelector('button[type="submit"]');
         btn.disabled = true;
@@ -184,7 +201,7 @@
             const order = items.length ? Math.max(...items.map((x) => x.order_index)) + 1 : 1;
             ({ error } = await supabaseClient.from(cfg.table).insert(Object.assign({ order_index: order }, record)));
           } else {
-            ({ error } = await supabaseClient.from(cfg.table).update(record).eq('id', item.id));
+            ({ error } = await window.nucleoRows(await supabaseClient.from(cfg.table).update(record).eq('id', item.id).select('id')));
           }
         } catch (err) {
           error = err;
@@ -204,9 +221,20 @@
     /* ---------- Reordenar ----------
        Se guarda la posición de todos los que cambian, así el orden queda
        prolijo aunque en la base hubiera posiciones repetidas. */
+    let moving = false;
     async function move(index, dir) {
       const target = index + dir;
-      if (target < 0 || target >= items.length) return;
+      if (moving || target < 0 || target >= items.length) return;
+      if (!othersDirtyOk(null)) return;
+      moving = true;
+      try {
+        await doMove(index, dir, target);
+      } finally {
+        moving = false;
+      }
+    }
+
+    async function doMove(index, dir, target) {
       const reordered = items.slice();
       [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
       const changes = reordered
@@ -214,7 +242,7 @@
         .filter(({ item, order }) => item.order_index !== order);
       try {
         const results = await Promise.all(
-          changes.map(({ item, order }) => supabaseClient.from(cfg.table).update({ order_index: order }).eq('id', item.id))
+          changes.map(({ item, order }) => supabaseClient.from(cfg.table).update({ order_index: order }).eq('id', item.id).select('id').then(window.nucleoRows))
         );
         if (results.some((r) => r.error)) throw new Error('reorder');
       } catch (e) {
@@ -249,10 +277,11 @@
         return;
       }
       if (action === 'delete') {
+        if (!othersDirtyOk(row.dataset.id)) return;
         if (!window.confirm(cfg.deleteText(item))) return;
         let error = null;
         try {
-          ({ error } = await supabaseClient.from(cfg.table).delete().eq('id', item.id));
+          ({ error } = await window.nucleoRows(await supabaseClient.from(cfg.table).delete().eq('id', item.id).select('id')));
         } catch (err) {
           error = err;
         }

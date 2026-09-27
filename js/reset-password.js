@@ -24,7 +24,12 @@
 
     btn.disabled = true;
     btn.textContent = 'Guardando…';
-    const { error } = await supabaseClient.auth.updateUser({ password });
+    let error = null;
+    try {
+      ({ error } = await supabaseClient.auth.updateUser({ password }));
+    } catch (err) {
+      error = err;
+    }
     btn.disabled = false;
     btn.textContent = 'Guardar nueva contraseña';
 
