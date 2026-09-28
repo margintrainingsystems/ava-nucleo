@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Precios | Núcleo — AVA</title>
+<title>Feriados | Núcleo — AVA</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,69 +54,46 @@
     <header class="topbar">
       <div class="topbar-title">
         <button type="button" class="sidebar-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar"><svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 5h14M2 9h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
-        <h1>Precios</h1>
+        <h1>Feriados</h1>
       </div>
       <div class="account-chip"><span class="account-dot" data-account-initial aria-hidden="true">·</span><span data-account-email>—</span></div>
     </header>
 
     <main class="main-content" id="contenido-principal">
-      <p class="body-lg" style="margin-bottom:28px;">Estos valores se ven en la página de Suscripción y en cualquier texto que use la garantía. Al guardar, el sitio los muestra la próxima vez que se cargue.</p>
+      <p class="body-lg" style="margin-bottom:12px;">Los días que no cuentan como hábiles. El CRM los usa para calcular el plazo de 5 días hábiles de los pedidos de corrección y borrado de datos (Ley 25.326). Sábados y domingos ya se saltean solos.</p>
+      <p class="row-note" style="margin-bottom:24px;">Copiá la lista oficial de feriados nacionales que publica el Gobierno en <a class="row-link" href="https://www.argentina.gob.ar" target="_blank" rel="noopener">argentina.gob.ar<span class="visually-hidden"> (se abre en otra pestaña)</span></a> (buscá "feriados nacionales"). Consultá con tu abogada si también cargás los días no laborables. Cuando cargás o borrás un feriado, los plazos pendientes se recalculan.</p>
 
-      <div class="panel">
-        <div class="panel-head"><h2>Editar precios</h2></div>
+      <div class="tabs" id="holiday-years" role="group" aria-label="Año" style="margin-bottom:20px;"></div>
+      <p class="row-note" id="holiday-warning" role="note" hidden></p>
 
-        <form id="pricing-form" class="stack-md" novalidate>
+      <div class="panel" style="margin-top:16px;">
+        <div class="panel-head">
+          <h2 id="holiday-title">Feriados</h2>
+          <button type="button" class="btn btn-solid btn-sm" id="holiday-add-btn" aria-expanded="false" aria-controls="holiday-form">+ Cargar feriados</button>
+        </div>
+        <form class="edit-form" id="holiday-form" hidden novalidate>
           <div class="field">
-            <label for="f-show-promo">¿Mostrar como oferta?</label>
-            <select id="f-show-promo" style="max-width:320px;">
-              <option value="true">Sí: precio regular tachado y precio de oferta</option>
-              <option value="false">No: un solo precio, sin tachar</option>
-            </select>
+            <label for="holiday-lines">Uno por renglón: la fecha y el nombre</label>
+            <textarea id="holiday-lines" rows="6" aria-describedby="holiday-lines-hint" placeholder="12/10/2026 Día del Respeto a la Diversidad Cultural&#10;20/11/2026 Día de la Soberanía Nacional"></textarea>
+            <p class="field-hint" id="holiday-lines-hint">La fecha puede ir como 12/10/2026 o 2026-10-12. Si una fecha ya está cargada, se deja como estaba.</p>
           </div>
-          <div class="field-row">
-            <div class="field">
-              <label for="f-promo" id="f-promo-label">Precio de oferta (el que se cobra)</label>
-              <input type="number" id="f-promo" step="1" min="0" required>
-              <span class="field-error" id="f-promo-error" hidden></span>
-            </div>
-            <div class="field" id="f-regular-field">
-              <label for="f-regular">Precio regular (se muestra tachado)</label>
-              <input type="number" id="f-regular" step="1" min="0" required aria-describedby="f-regular-hint">
-              <span class="field-hint" id="f-regular-hint">Tiene que ser más alto que el precio de oferta.</span>
-              <span class="field-error" id="f-regular-error" hidden></span>
-            </div>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label for="f-guarantee">Días de garantía</label>
-              <input type="number" id="f-guarantee" step="1" min="0" required>
-              <span class="field-error" id="f-guarantee-error" hidden></span>
-            </div>
-            <div class="field">
-              <label for="f-currency">Moneda</label>
-              <input type="text" id="f-currency" maxlength="3" required style="max-width:120px; text-transform:uppercase;" aria-describedby="f-currency-hint">
-              <span class="field-hint" id="f-currency-hint">Código de 3 letras, por ejemplo USD o ARS.</span>
-              <span class="field-error" id="f-currency-error" hidden></span>
-            </div>
-          </div>
-          <p class="body-md">El precio de cada Máster por separado se edita en <a href="/masteres.html" style="color:var(--green); font-weight:600;">Másteres</a>: el total de la vista previa se calcula solo, sumando esos precios.</p>
-          <div class="edit-actions" style="align-items:center;">
-            <button type="submit" class="btn btn-solid" id="save-btn">Guardar cambios</button>
-            <span class="field-hint" id="last-saved"></span>
+          <p class="field-error" id="holiday-error" role="alert" hidden></p>
+          <div class="edit-actions">
+            <button type="submit" class="btn btn-solid btn-sm">Guardar</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-cancel>Cancelar</button>
           </div>
         </form>
-      </div>
-
-      <div class="panel">
-        <div class="panel-head"><h2>Vista previa</h2></div>
-        <p class="body-md" style="margin-bottom:18px;">Así se ve el desglose en la página de Suscripción, con los textos actuales del sitio.</p>
-        <div class="value-stack" id="preview-stack"></div>
+        <div class="data-list" id="holiday-list" style="margin-top:16px;">
+          <div class="empty-state">Cargando feriados…</div>
+        </div>
       </div>
     </main>
   </div>
 </div>
 
+
 <script src="/js/main.js"></script>
-<script src="/js/precios.js"></script>
+<script src="/js/crm-admin.js"></script>
+<script src="/js/crm-feriados.js"></script>
 </body>
 </html>

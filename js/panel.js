@@ -57,10 +57,20 @@
     }
 
     // Resumen del CRM: personas del equipo (sin contar a la propietaria) y roles.
-    const [crmTeam, crmRoles] = await Promise.all([
+    const thisYear = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric' }).format(new Date());
+    const [crmTeam, crmRoles, holidays] = await Promise.all([
       supabaseClient.from('crm_members').select('user_id', { count: 'exact', head: true }).eq('is_owner', false),
       supabaseClient.from('crm_roles').select('id', { count: 'exact', head: true }),
+      supabaseClient
+        .from('crm_holidays')
+        .select('id', { count: 'exact', head: true })
+        .gte('day', `${thisYear}-01-01`)
+        .lte('day', `${thisYear}-12-31`),
     ]).catch(() => []);
+    if (holidays && !holidays.error) {
+      const n = holidays.count || 0;
+      set('tile-feriados', n === 0 ? `Faltan los feriados de ${thisYear}: los plazos pueden quedar cortos.` : `${n} feriados cargados en ${thisYear}.`);
+    }
     if (crmTeam && !crmTeam.error) {
       const n = crmTeam.count || 0;
       set('tile-equipo', n === 0 ? 'Todavía no invitaste a nadie al CRM.' : n === 1 ? '1 persona en el equipo.' : `${n} personas en el equipo.`);

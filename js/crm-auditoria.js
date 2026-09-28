@@ -20,7 +20,7 @@
       .select('id, at, actor_id, actor_email, action, entity, entity_id, detail')
       .order('id', { ascending: false })
       .limit(PAGE);
-    if (filter === 'personas') q = q.in('entity', ['crm_people', 'leads']);
+    if (filter === 'personas') q = q.in('entity', ['crm_people', 'leads', 'crm_data_requests']);
     if (filter === 'equipo') q = q.eq('entity', 'crm_members');
     if (filter === 'roles') q = q.in('entity', ['crm_roles', 'crm_role_permissions']);
     if (before) q = q.lt('id', before);

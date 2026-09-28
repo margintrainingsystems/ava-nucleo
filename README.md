@@ -18,12 +18,13 @@ Panel privado de la dueña para administrar todo AVA: el sitio y el CRM. Es una 
 | **CRM → Equipo** | Invitar personas al CRM, cambiar su nombre y rol, reenviar invitaciones, desactivar, reactivar y quitar | CRM |
 | **CRM → Roles y permisos** | Crear, editar y borrar roles; elegir sus permisos (los sensibles van marcados) | CRM |
 | **CRM → Auditoría** | Quién abrió fichas, descargó datos o cambió algo en el CRM, y cuándo. Solo lectura | Solo en Núcleo |
+| **CRM → Feriados** | Los días que no cuentan como hábiles. Se pegan varios juntos (uno por renglón). Al cargar o borrar uno, el CRM recalcula los plazos pendientes | Plazos de los pedidos de datos en el CRM |
 | **Ajustes** | Cambiar la contraseña | — |
 
 ## Núcleo y el CRM
 
 - **Núcleo** es solo de la dueña: el sitio, la configuración del CRM, el equipo, los roles y la auditoría.
-- **El CRM** (`https://ava-crm.netlify.app`, repo `ava-crm`) es la herramienta de trabajo diario que se comparte con el equipo: mensajes, personas y, más adelante, pedidos, suscripciones y sorteo.
+- **El CRM** (`https://ava-crm.netlify.app`, repo `ava-crm`) es la herramienta de trabajo diario que se comparte con el equipo: mensajes, personas, pedidos de datos, consentimientos, retención y, más adelante, suscripciones y sorteo.
 - La sección Mensajes se mudó al CRM. `/mensajes.html` redirige ahí para que los links viejos sigan funcionando.
 - Equipo, Roles y Auditoría funcionan solo si la cuenta de Núcleo también es la propietaria del CRM (`crm_members.is_owner`). Hoy lo es `ilearnwithava@gmail.com`.
 - Las invitaciones las manda la Edge Function `crm-equipo` (su código vive en el repo `ava-crm`). El link del email siempre lleva al CRM.
@@ -57,7 +58,7 @@ El panel ya no tiene pantalla para crear cuentas. Para que tampoco se puedan cre
 /
 ├── index.html · login.html · reset-password.html · 404.html
 ├── panel.html · contenido.html · resenas.html
-├── equipo.html · roles.html · auditoria.html   Administración del CRM
+├── equipo.html · roles.html · auditoria.html · feriados.html   Administración del CRM
 ├── masteres.html · precios.html · faq.html · whatsapp.html · email.html · redes.html · ajustes.html
 ├── css/base.css      Compartido con el sitio (colores, tipografía, botones)
 ├── css/nucleo.css    Estructura y componentes del panel
@@ -67,6 +68,6 @@ El panel ya no tiene pantalla para crear cuentas. Para que tampoco se puedan cre
     ├── contenido.js       Editor de textos
     ├── list-editor.js     Editor compartido de Másteres, preguntas, WhatsApp, Email y Redes
     ├── crm-admin.js       Utilidades del CRM: fechas, invitaciones, permisos y textos de la auditoría
-    ├── crm-equipo.js · crm-roles.js · crm-auditoria.js
+    ├── crm-equipo.js · crm-roles.js · crm-auditoria.js · crm-feriados.js
     └── (un archivo por sección)
 ```

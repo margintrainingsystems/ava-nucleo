@@ -103,6 +103,14 @@
   }
 
   // Devuelve texto plano (sin HTML): quien lo muestre lo escapa.
+  const DATA_REQUEST_LABEL = { acceso: 'Acceso', rectificacion: 'Rectificación', supresion: 'Supresión' };
+
+  // Fecha sin hora ('2026-10-12'): se muestra tal cual, sin correrla por la zona horaria.
+  function fmtDay(day) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day || '');
+    return m ? `${m[3]}/${m[2]}/${m[1]}` : day;
+  }
+
   function describeAudit(entry, lookup) {
     const detail = obj(entry.detail);
     const before = obj(detail.antes);
@@ -159,6 +167,36 @@
       }
       if (entry.action === 'exportar_personas') return `Descargó ${plural(Number(detail.cantidad || 0), 'persona', 'personas')} en CSV`;
       if (entry.action === 'exportar_persona') return 'Descargó todos los datos de una persona';
+      if (entry.action === 'retirar_consentimiento') return 'Registró que una persona retiró la autorización para publicar su nombre';
+    }
+
+    if (entry.entity === 'leads' && entry.action === 'borrar_vencidos') {
+      const people = Number(detail.personas || 0);
+      return `Borró ${plural(Number(detail.mensajes || 0), 'formulario vencido', 'formularios vencidos')}${
+        people ? ` y ${plural(people, 'persona sin formularios', 'personas sin formularios')}` : ''
+      }`;
+    }
+
+    if (entry.entity === 'crm_data_requests') {
+      const code = text(detail.codigo);
+      const kind = DATA_REQUEST_LABEL[text(detail.tipo)] || text(detail.tipo);
+      if (entry.action === 'crear_pedido_datos') return `Registró el pedido de datos ${code} (${kind.toLowerCase()})`;
+      if (entry.action === 'editar_pedido_datos') {
+        const fields = Array.isArray(detail.campos) ? detail.campos.map((c) => (text(c) === 'identidad' ? 'identidad verificada' : 'detalle')) : [];
+        return `Editó el pedido de datos ${code}: ${fields.join(', ')}`;
+      }
+      if (entry.action === 'cerrar_pedido_datos') {
+        if (detail.estado === 'anulado') return `Anuló el pedido de datos ${code}`;
+        return `Respondió el pedido de datos ${code}${detail.a_tiempo === false ? ', fuera de plazo' : ''}`;
+      }
+    }
+
+    if (entry.entity === 'crm_holidays') {
+      const day = text(after.day) || text(before.day);
+      const name = text(after.name) || text(before.name);
+      if (entry.action === 'insert') return `Cargó el feriado del ${fmtDay(day)} (${name})`;
+      if (entry.action === 'delete') return `Borró el feriado del ${fmtDay(day)} (${name})`;
+      return `Editó el feriado del ${fmtDay(day)}`;
     }
 
     return `${entry.action} en ${entry.entity}`;
@@ -182,5 +220,6 @@
     memberState,
     describeAudit,
     auditPersonLink,
+    fmtDay,
   };
 })();
