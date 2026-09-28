@@ -94,6 +94,7 @@
 
   /* ---------- Textos de la auditoría ---------- */
   const text = (v) => (typeof v === 'string' ? v : '');
+  const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? String(v) : text(v));
   const obj = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {});
   const FIELD_LABEL = { nombre: 'nombre', apellido: 'apellido', pais: 'país', etiquetas: 'etiquetas', email: 'email', telefono: 'teléfono' };
 
@@ -103,6 +104,14 @@
   }
 
   // Devuelve texto plano (sin HTML): quien lo muestre lo escapa.
+  const PROVIDER_LABEL = { mercadopago: 'Mercado Pago', paypal: 'PayPal', manual: 'registro manual' };
+  const REFUND_LABEL = {
+    garantia: 'Garantía de 15 días',
+    arrepentimiento: 'Arrepentimiento',
+    baja_de_master: 'Baja de un Máster',
+    menor_de_edad: 'Menor de edad',
+    otro: 'Otro motivo',
+  };
   const DATA_REQUEST_LABEL = { acceso: 'Acceso', rectificacion: 'Rectificación', supresion: 'Supresión' };
 
   // Fecha sin hora ('2026-10-12'): se muestra tal cual, sin correrla por la zona horaria.
@@ -201,7 +210,12 @@
     }
 
     if (entry.entity === 'crm_email_templates' && entry.action === 'editar_plantilla') {
-      const names = { confirmacion_arrepentimiento: 'Confirmación de arrepentimiento', confirmacion_baja: 'Confirmación de baja' };
+      const names = {
+        confirmacion_arrepentimiento: 'Confirmación de arrepentimiento',
+        confirmacion_baja: 'Confirmación de baja',
+        aviso_renovacion: 'Aviso de renovación',
+        aviso_beca: 'Aviso a quien gana una beca',
+      };
       return `Editó la plantilla "${names[entry.entity_id] || entry.entity_id}"`;
     }
 
@@ -214,6 +228,48 @@
       };
       const fields = Array.isArray(detail.campos) ? detail.campos.map((c) => labels[text(c)] || text(c)) : [];
       return `Cambió la configuración de emails: ${fields.join(', ')}`;
+    }
+
+    if (entry.entity === 'crm_subscriptions') {
+      const medio = PROVIDER_LABEL[text(detail.medio)] || text(detail.medio);
+      if (entry.action === 'registrar_alta') {
+        return `Registró un alta en ${text(detail.moneda)} por ${medio}${detail.beca === true ? ', con beca del sorteo' : ''}`;
+      }
+      if (entry.action === 'registrar_renovacion') return `Registró una renovación en ${text(detail.moneda)} por ${medio}`;
+      if (entry.action === 'dar_de_baja') return `Dio de baja la suscripción ${text(detail.codigo)}`;
+      if (entry.action === 'registrar_devolucion') {
+        const reason = REFUND_LABEL[text(detail.motivo)] || text(detail.motivo);
+        return `Registró una devolución ${detail.total === true ? 'total' : 'parcial'} (${reason.toLowerCase()})`;
+      }
+    }
+
+    if (entry.entity === 'crm_enrollment_settings' && entry.action === 'editar_inscripciones') {
+      const changes = Array.isArray(detail.cambios) ? detail.cambios.map(text) : [];
+      const parts = [];
+      if (changes.includes('abrir')) parts.push('abrió las inscripciones');
+      if (changes.includes('cerrar')) parts.push('cerró las inscripciones');
+      if (changes.includes('cupo')) parts.push(`dejó el cupo en ${num(detail.cupo)}`);
+      const sentence = parts.join(' y ') || 'editó las inscripciones';
+      return sentence.charAt(0).toUpperCase() + sentence.slice(1);
+    }
+
+    if (entry.entity === 'crm_fx_rates' && entry.action === 'cargar_cotizacion') {
+      return `Cargó a mano el dólar blue a $ ${Number(detail.cotizacion || 0).toLocaleString('es-AR')}`;
+    }
+
+    if (entry.entity === 'crm_raffles') {
+      const numero = num(detail.numero);
+      if (entry.action === 'preparar_sorteo') return `Numeró la lista de espera para el sorteo: ${plural(Number(detail.participantes || 0), 'participante', 'participantes')}`;
+      if (entry.action === 'sortear_becas') {
+        const numbers = Array.isArray(detail.numeros) ? detail.numeros.map(num) : [];
+        return `Sorteó las becas: salieron los números ${numbers.join(', ')}`;
+      }
+      if (entry.action === 'avisar_beca') return `Avisó por email al número ${numero} que ganó una beca`;
+      if (entry.action === 'resolver_beca') {
+        const states = { acepto: 'aceptó la beca', rechazo: 'no quiere la beca', sin_respuesta: 'no respondió' };
+        return `Registró que el número ${numero} ${states[text(detail.estado)] || text(detail.estado)}`;
+      }
+      if (entry.action === 'cerrar_sorteo') return 'Cerró el sorteo de becas';
     }
 
     if (entry.entity === 'crm_holidays') {

@@ -21,6 +21,7 @@
       .order('id', { ascending: false })
       .limit(PAGE);
     if (filter === 'personas') q = q.in('entity', ['crm_people', 'leads', 'crm_data_requests', 'crm_emails']);
+    if (filter === 'cobros') q = q.in('entity', ['crm_subscriptions', 'crm_enrollment_settings', 'crm_fx_rates', 'crm_raffles']);
     if (filter === 'equipo') q = q.eq('entity', 'crm_members');
     if (filter === 'roles') q = q.in('entity', ['crm_roles', 'crm_role_permissions']);
     if (before) q = q.lt('id', before);

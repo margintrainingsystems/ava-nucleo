@@ -17,15 +17,15 @@ Panel privado de la dueña para administrar todo AVA: el sitio y el CRM. Es una 
 | **CRM → Mensajes** | Abre el CRM en otra pestaña. El menú muestra cuántos mensajes hay sin leer | CRM |
 | **CRM → Equipo** | Invitar personas al CRM, cambiar su nombre y rol, reenviar invitaciones, desactivar, reactivar y quitar | CRM |
 | **CRM → Roles y permisos** | Crear, editar y borrar roles; elegir sus permisos (los sensibles van marcados) | CRM |
-| **CRM → Auditoría** | Quién abrió fichas, descargó datos o cambió algo en el CRM, y cuándo. Solo lectura | Solo en Núcleo |
-| **CRM → Emails y plantillas** | Abre CRM → Configuración: remitente, confirmación automática, plantillas y email de prueba. Se puede delegar con el permiso "Editar la configuración" | CRM |
+| **CRM → Auditoría** | Quién abrió fichas, descargó datos, cobró, sorteó o cambió algo en el CRM, y cuándo. Filtro "Cobros y sorteo" para altas, bajas, devoluciones, cupo, cotización y becas. Solo lectura | Solo en Núcleo |
+| **CRM → Cupo, dólar y emails** | Abre CRM → Configuración: abrir y cerrar inscripciones, el cupo de suscripciones anuales, la cotización del dólar blue (se lee sola de dolarhoy.com y se puede cargar a mano), remitente, plantillas y email de prueba. Se puede delegar con el permiso "Editar la configuración" | CRM y, en la fase 4 parte 2, la página de Suscripción |
 | **CRM → Feriados** | Los días que no cuentan como hábiles. Se pegan varios juntos (uno por renglón). Al cargar o borrar uno, el CRM recalcula los plazos pendientes | Plazos de los pedidos de datos en el CRM |
 | **Ajustes** | Cambiar la contraseña | — |
 
 ## Núcleo y el CRM
 
 - **Núcleo** es solo de la dueña: el sitio, la configuración del CRM, el equipo, los roles y la auditoría.
-- **El CRM** (`https://ava-crm.netlify.app`, repo `ava-crm`) es la herramienta de trabajo diario que se comparte con el equipo: mensajes, personas, pedidos de datos, consentimientos, retención y, más adelante, suscripciones y sorteo.
+- **El CRM** (`https://ava-crm.netlify.app`, repo `ava-crm`) es la herramienta de trabajo diario que se comparte con el equipo: mensajes, personas, pedidos de datos, consentimientos, retención, suscripciones, pagos y el sorteo de becas.
 - La sección Mensajes se mudó al CRM. `/mensajes.html` redirige ahí para que los links viejos sigan funcionando.
 - Equipo, Roles y Auditoría funcionan solo si la cuenta de Núcleo también es la propietaria del CRM (`crm_members.is_owner`). Hoy lo es `ilearnwithava@gmail.com`.
 - Las invitaciones las manda la Edge Function `crm-equipo` (su código vive en el repo `ava-crm`). El link del email siempre lleva al CRM.
