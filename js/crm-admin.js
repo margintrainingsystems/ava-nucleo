@@ -215,6 +215,7 @@
         confirmacion_baja: 'Confirmación de baja',
         aviso_renovacion: 'Aviso de renovación',
         aviso_beca: 'Aviso a quien gana una beca',
+        aviso_fecha_sorteo: 'Aviso de la fecha del sorteo',
       };
       return `Editó la plantilla "${names[entry.entity_id] || entry.entity_id}"`;
     }
@@ -270,6 +271,9 @@
         return `Registró que el número ${numero} ${states[text(detail.estado)] || text(detail.estado)}`;
       }
       if (entry.action === 'cerrar_sorteo') return 'Cerró el sorteo de becas';
+      if (entry.action === 'anunciar_sorteo') {
+        return `Avisó a la lista de espera que el sorteo es el ${fmtDay(text(detail.fecha))} (${plural(Number(detail.destinatarios || 0), 'email', 'emails')})`;
+      }
     }
 
     if (entry.entity === 'crm_holidays') {
