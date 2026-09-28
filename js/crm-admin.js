@@ -146,7 +146,9 @@
 
     if (entry.entity === 'leads') {
       const code = text(detail.codigo);
-      if (entry.action === 'confirmar_pedido') return `Confirmó el pedido ${code}`;
+      if (entry.action === 'confirmar_pedido') {
+        return detail.via === 'email automatico' ? `El CRM confirmó el pedido ${code} por email automático` : `Confirmó el pedido ${code}`;
+      }
       if (entry.action === 'borrar_mensaje') {
         const type = (SOURCE_LABEL[text(detail.tipo)] || text(detail.tipo)).toLowerCase();
         return `Borró un mensaje de ${type}${code ? ` (${code})` : ''}`;
@@ -189,6 +191,29 @@
         if (detail.estado === 'anulado') return `Anuló el pedido de datos ${code}`;
         return `Respondió el pedido de datos ${code}${detail.a_tiempo === false ? ', fuera de plazo' : ''}`;
       }
+    }
+
+    if (entry.entity === 'crm_emails') {
+      if (entry.action === 'escribir_email') return 'Escribió un email a una persona desde su ficha';
+      if (entry.action === 'cancelar_email') {
+        return detail.clase === 'confirmacion' ? 'Canceló un email automático de confirmación' : 'Canceló un email antes de que saliera';
+      }
+    }
+
+    if (entry.entity === 'crm_email_templates' && entry.action === 'editar_plantilla') {
+      const names = { confirmacion_arrepentimiento: 'Confirmación de arrepentimiento', confirmacion_baja: 'Confirmación de baja' };
+      return `Editó la plantilla "${names[entry.entity_id] || entry.entity_id}"`;
+    }
+
+    if (entry.entity === 'crm_email_settings' && entry.action === 'editar_config_email') {
+      const labels = {
+        nombre_remitente: 'nombre del remitente',
+        email_remitente: 'email remitente',
+        responder_a: 'email para respuestas',
+        confirmacion_automatica: 'confirmación automática',
+      };
+      const fields = Array.isArray(detail.campos) ? detail.campos.map((c) => labels[text(c)] || text(c)) : [];
+      return `Cambió la configuración de emails: ${fields.join(', ')}`;
     }
 
     if (entry.entity === 'crm_holidays') {

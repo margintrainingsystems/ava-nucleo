@@ -18,6 +18,7 @@ Panel privado de la dueña para administrar todo AVA: el sitio y el CRM. Es una 
 | **CRM → Equipo** | Invitar personas al CRM, cambiar su nombre y rol, reenviar invitaciones, desactivar, reactivar y quitar | CRM |
 | **CRM → Roles y permisos** | Crear, editar y borrar roles; elegir sus permisos (los sensibles van marcados) | CRM |
 | **CRM → Auditoría** | Quién abrió fichas, descargó datos o cambió algo en el CRM, y cuándo. Solo lectura | Solo en Núcleo |
+| **CRM → Emails y plantillas** | Abre CRM → Configuración: remitente, confirmación automática, plantillas y email de prueba. Se puede delegar con el permiso "Editar la configuración" | CRM |
 | **CRM → Feriados** | Los días que no cuentan como hábiles. Se pegan varios juntos (uno por renglón). Al cargar o borrar uno, el CRM recalcula los plazos pendientes | Plazos de los pedidos de datos en el CRM |
 | **Ajustes** | Cambiar la contraseña | — |
 

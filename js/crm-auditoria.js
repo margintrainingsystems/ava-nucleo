@@ -20,7 +20,7 @@
       .select('id, at, actor_id, actor_email, action, entity, entity_id, detail')
       .order('id', { ascending: false })
       .limit(PAGE);
-    if (filter === 'personas') q = q.in('entity', ['crm_people', 'leads', 'crm_data_requests']);
+    if (filter === 'personas') q = q.in('entity', ['crm_people', 'leads', 'crm_data_requests', 'crm_emails']);
     if (filter === 'equipo') q = q.eq('entity', 'crm_members');
     if (filter === 'roles') q = q.in('entity', ['crm_roles', 'crm_role_permissions']);
     if (before) q = q.lt('id', before);
@@ -39,7 +39,7 @@
         <div class="data-row">
           <div class="data-row-main">
             <div class="data-row-title">${esc(describeAudit(e, lookup))}</div>
-            <div class="data-row-sub">${esc(e.actor_email || 'Sistema')} · ${esc(fmtDateTime(e.at))}${
+            <div class="data-row-sub">${esc(e.actor_email || 'El CRM, automático')} · ${esc(fmtDateTime(e.at))}${
               link ? ` · <a class="row-link" href="${esc(link)}" target="_blank" rel="noopener">Ver la ficha en el CRM<span class="visually-hidden"> (se abre en otra pestaña)</span></a>` : ''
             }</div>
           </div>
