@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FAQ | Núcleo — AVA</title>
+<title>Autorizaciones | Núcleo — AVA</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -48,27 +48,30 @@
     <header class="topbar">
       <div class="topbar-title">
         <button type="button" class="sidebar-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar"><svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 5h14M2 9h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
-        <h1>Preguntas frecuentes</h1>
+        <h1>Autorizaciones de menores</h1>
       </div>
       <div class="account-chip"><span class="account-dot" data-account-initial aria-hidden="true">·</span><span data-account-email>—</span></div>
     </header>
 
     <main class="main-content" id="contenido-principal">
-      <p class="body-lg" style="margin-bottom:28px;">Son las preguntas de la sección "Antes de anotarte", en la página de Suscripción. Usá las flechas para cambiar el orden.</p>
+      <p class="body-lg" style="margin-bottom:24px;">Las autorizaciones que firman madre, padre o tutor/a en la página "Autorización para menores de edad" del sitio. Revisá que los datos tengan sentido, marcala como verificada y recién ahí habilitá el acceso o entregá la beca.</p>
+
+      <div class="tabs" id="tabs" role="group" aria-label="Qué autorizaciones ver" style="margin-bottom:20px;">
+        <button type="button" data-status="nuevo" aria-pressed="true">Para revisar<span class="tab-count" data-count="nuevo"></span></button>
+        <button type="button" data-status="verificado" aria-pressed="false">Verificadas<span class="tab-count" data-count="verificado"></span></button>
+        <button type="button" data-status="revocado" aria-pressed="false">Revocadas<span class="tab-count" data-count="revocado"></span></button>
+      </div>
 
       <div class="panel">
-        <div class="data-list" id="faq-list">
-          <div class="empty-state">Cargando preguntas…</div>
+        <div class="data-list" id="auth-list">
+          <div class="empty-state">Cargando autorizaciones…</div>
         </div>
-        <button type="button" class="btn btn-outline" id="add-faq-btn" style="margin-top:20px;">+ Agregar pregunta</button>
       </div>
     </main>
   </div>
 </div>
 
-
 <script src="/js/main.js"></script>
-<script src="/js/list-editor.js"></script>
-<script src="/js/faq-admin.js"></script>
+<script src="/js/autorizaciones.js"></script>
 </body>
 </html>

@@ -5,7 +5,7 @@
 // type: line = una línea · text = párrafo · block = varios párrafos
 //       ("## " título, "- " lista) · list = un ítem por renglón
 // ============================================================
-window.NUCLEO_COPY_GROUPS = ["Inicio", "Sobre AVA", "Propuesta académica", "Suscripción", "Reseñas", "Contacto", "Privacidad", "Términos y condiciones", "Arrepentimiento y baja", "Menú y pie de página", "Textos generales"];
+window.NUCLEO_COPY_GROUPS = ["Inicio", "Sobre AVA", "Propuesta académica", "Suscripción", "Reseñas", "Contacto", "Privacidad", "Términos y condiciones", "Arrepentimiento y baja", "Autorización para menores", "Menú y pie de página", "Textos generales"];
 window.NUCLEO_COPY_FIELDS = [
   {"key": "hero_title", "group": "Inicio", "section": "Portada", "label": "Título principal", "type": "text", "required": true},
   {"key": "hero_subtitle", "group": "Inicio", "section": "Portada", "label": "Bajada", "type": "text"},
@@ -170,6 +170,34 @@ window.NUCLEO_COPY_FIELDS = [
   {"key": "consent_label", "group": "Textos generales", "section": "Formularios", "label": "Casilla de la Política de privacidad (contacto, lista de espera y reseñas)", "type": "text", "required": true, "where": "Contacto, Suscripción, Reseñas"},
   {"key": "consent_link", "group": "Textos generales", "section": "Formularios", "label": "Link a la Política de privacidad (al lado de la casilla y del aviso)", "type": "line", "required": true, "where": "Contacto, Suscripción, Reseñas, Arrepentimiento, Baja"},
   {"key": "publish_consent_label", "group": "Suscripción", "section": "Lista de espera", "label": "Casilla opcional: autorización para publicar el nombre si gana una beca", "type": "text", "required": true},
+  {"key": "minor_auth_link", "group": "Autorización para menores", "section": "Link", "label": "Link en el pie de todas las páginas", "type": "line", "required": true, "where": "Todas las páginas"},
+  {"key": "minor_auth_title", "group": "Autorización para menores", "section": "Portada", "label": "Título", "type": "line", "required": true},
+  {"key": "minor_auth_text", "group": "Autorización para menores", "section": "Portada", "label": "Texto", "type": "block"},
+  {"key": "minor_auth_adult_legend", "group": "Autorización para menores", "section": "Formulario", "label": "Título: datos de la persona adulta", "type": "line", "required": true},
+  {"key": "minor_auth_label_doc_type", "group": "Autorización para menores", "section": "Formulario", "label": "Campo tipo de documento", "type": "line", "required": true},
+  {"key": "minor_auth_label_doc_number", "group": "Autorización para menores", "section": "Formulario", "label": "Campo número de documento", "type": "line", "required": true},
+  {"key": "minor_auth_label_relationship", "group": "Autorización para menores", "section": "Formulario", "label": "Campo vínculo", "type": "line", "required": true},
+  {"key": "minor_auth_minor_legend", "group": "Autorización para menores", "section": "Formulario", "label": "Título: datos de la persona menor", "type": "line", "required": true},
+  {"key": "minor_auth_label_minor_name", "group": "Autorización para menores", "section": "Formulario", "label": "Campo nombre de la persona menor", "type": "line", "required": true},
+  {"key": "minor_auth_label_minor_last_name", "group": "Autorización para menores", "section": "Formulario", "label": "Campo apellido de la persona menor", "type": "line", "required": true},
+  {"key": "minor_auth_label_birthdate", "group": "Autorización para menores", "section": "Formulario", "label": "Campo fecha de nacimiento", "type": "line", "required": true},
+  {"key": "minor_auth_label_minor_email", "group": "Autorización para menores", "section": "Formulario", "label": "Campo email de la persona menor", "type": "line", "required": true},
+  {"key": "minor_auth_scope_legend", "group": "Autorización para menores", "section": "Formulario", "label": "Título: qué autoriza", "type": "line", "required": true},
+  {"key": "minor_auth_scope_subscription", "group": "Autorización para menores", "section": "Formulario", "label": "Opción: usar la suscripción", "type": "text", "required": true},
+  {"key": "minor_auth_scope_raffle", "group": "Autorización para menores", "section": "Formulario", "label": "Opción: participar del sorteo", "type": "text", "required": true},
+  {"key": "minor_auth_terms", "group": "Autorización para menores", "section": "Formulario", "label": "Lo que declara al firmar", "type": "block"},
+  {"key": "minor_auth_terms_label", "group": "Autorización para menores", "section": "Formulario", "label": "Casilla de Términos", "type": "text", "required": true},
+  {"key": "minor_auth_terms_link", "group": "Autorización para menores", "section": "Formulario", "label": "Link a los Términos", "type": "line", "required": true},
+  {"key": "minor_auth_declaration", "group": "Autorización para menores", "section": "Formulario", "label": "Casilla de declaración", "type": "text", "required": true},
+  {"key": "minor_auth_label_signature", "group": "Autorización para menores", "section": "Formulario", "label": "Campo firma", "type": "line", "required": true},
+  {"key": "minor_auth_submit", "group": "Autorización para menores", "section": "Formulario", "label": "Botón", "type": "line", "required": true},
+  {"key": "minor_auth_error_scope", "group": "Autorización para menores", "section": "Formulario", "label": "Error: no marcó qué autoriza", "type": "text"},
+  {"key": "minor_auth_error_birthdate", "group": "Autorización para menores", "section": "Formulario", "label": "Error: fecha de nacimiento", "type": "text"},
+  {"key": "minor_auth_error_connection", "group": "Autorización para menores", "section": "Formulario", "label": "Error: sin conexión", "type": "text"},
+  {"key": "minor_auth_error_send", "group": "Autorización para menores", "section": "Formulario", "label": "Error: no se pudo guardar", "type": "text"},
+  {"key": "minor_auth_done_title", "group": "Autorización para menores", "section": "Confirmación", "label": "Título", "type": "line", "required": true},
+  {"key": "minor_auth_code_label", "group": "Autorización para menores", "section": "Confirmación", "label": "Texto sobre el código", "type": "line", "required": true},
+  {"key": "minor_auth_done_text", "group": "Autorización para menores", "section": "Confirmación", "label": "Texto", "type": "text"},
   {"key": "form_sending", "group": "Textos generales", "section": "Formularios", "label": "Botón mientras se envía", "type": "line", "required": true},
   {"key": "campus_url", "group": "Textos generales", "section": "Campus", "label": "Link del Campus (vacío = todavía no abrió)", "type": "line"},
   {"key": "campus_closed", "group": "Textos generales", "section": "Campus", "label": "Aviso mientras el Campus no abrió", "type": "text"},
