@@ -10,7 +10,7 @@
   const COLORS = [
     { value: 'accent-1', label: 'Acento 1 (azulado)' },
     { value: 'accent-2', label: 'Acento 2 (violáceo)' },
-    { value: 'accent-3', label: 'Acento 3 (dorado)' },
+    { value: 'accent-3', label: 'Acento 3 (naranja)' },
   ];
   const colorLabel = (token) => (COLORS.find((c) => c.value === token) || { label: 'Según su posición' }).label.replace(/ \(.*\)/, '');
   let currency = 'USD';

@@ -84,6 +84,7 @@
       l.country ? ['País', esc(l.country)] : null,
       l.motivo ? [request ? 'Operación' : 'Motivo', esc(l.motivo)] : null,
       request ? null : ['Privacidad', l.privacy_consent ? 'Marcó la casilla (consentimiento expreso)' : 'Sin casilla: llegó antes de que existiera'],
+      l.source === 'suscripcion' ? ['Publicar su nombre si gana', l.publish_consent ? 'Sí, lo autorizó' : 'No autorizado'] : null,
       ['Llegó', fmtDate(l.created_at)],
       request ? ['Plazo', requestStatus(l)] : null,
     ].filter(Boolean);
@@ -315,9 +316,9 @@
       if (/^[=+\-@\t\r]/.test(s) && !/^\+[\d\s()-]+$/.test(s)) s = "'" + s;
       return `"${s.replace(/"/g, '""')}"`;
     };
-    const header = ['Fecha', 'Tipo', 'Código', 'Nombre', 'Apellido', 'Email', 'Teléfono', 'País', 'Motivo u operación', 'Mensaje', 'Estado', 'Confirmado', 'Aceptó privacidad', 'Notas'];
+    const header = ['Fecha', 'Tipo', 'Código', 'Nombre', 'Apellido', 'Email', 'Teléfono', 'País', 'Motivo u operación', 'Mensaje', 'Estado', 'Confirmado', 'Aceptó privacidad', 'Autorizó publicar su nombre', 'Notas'];
     const lines = rows.map((l) =>
-      [fmtDate(l.created_at), SOURCE_LABEL[l.source] || l.source, l.request_code, l.name, l.last_name, l.email, l.phone, l.country, l.motivo, l.message, STATUS_LABEL[l.status] || l.status, l.confirmed_at ? fmtDate(l.confirmed_at) : '', isRequest(l) ? '' : (l.privacy_consent ? 'Sí' : 'No'), l.notes]
+      [fmtDate(l.created_at), SOURCE_LABEL[l.source] || l.source, l.request_code, l.name, l.last_name, l.email, l.phone, l.country, l.motivo, l.message, STATUS_LABEL[l.status] || l.status, l.confirmed_at ? fmtDate(l.confirmed_at) : '', isRequest(l) ? '' : (l.privacy_consent ? 'Sí' : 'No'), l.source === 'suscripcion' ? (l.publish_consent ? 'Sí' : 'No') : '', l.notes]
         .map(cell)
         .join(';')
     );
