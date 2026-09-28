@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contenido del sitio | Núcleo — AVA</title>
+<title>Roles y permisos | Núcleo — AVA</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,53 +53,31 @@
     <header class="topbar">
       <div class="topbar-title">
         <button type="button" class="sidebar-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar"><svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 5h14M2 9h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
-        <h1>Contenido del sitio</h1>
+        <h1>Roles y permisos</h1>
       </div>
       <div class="account-chip"><span class="account-dot" data-account-initial aria-hidden="true">·</span><span data-account-email>—</span></div>
     </header>
 
     <main class="main-content" id="contenido-principal">
-      <p class="body-lg" style="margin-bottom:24px;">Todos los textos del sitio, ordenados por página. Cambiá lo que necesites y guardá: el sitio los muestra la próxima vez que se cargue la página.</p>
+      <p class="body-lg" style="margin-bottom:28px;">Cada rol reúne los permisos de un puesto. Si cambiás un rol, el cambio rige al instante en el CRM para todas las personas que lo tienen. Dale a cada rol solo lo que necesita.</p>
 
-      <details class="panel copy-help">
-        <summary>Cómo escribir los textos</summary>
-        <ul>
-          <li><strong>*texto*</strong> se ve en cursiva.</li>
-          <li>En los campos grandes, un renglón vacío empieza un párrafo nuevo; <strong>## </strong> al principio de un renglón lo convierte en título y <strong>- </strong> en un ítem de lista.</li>
-          <li>Marcadores que se completan solos: <strong>{cantidad}</strong> o <strong>{Cantidad}</strong> (cantidad de Másteres en palabras), <strong>{garantia}</strong> (días de garantía de Precios) y <strong>{anio}</strong> (año actual).</li>
-          <li>Si dejás un campo vacío, ese texto deja de mostrarse en el sitio. Los campos marcados como obligatorios no pueden quedar vacíos.</li>
-        </ul>
-      </details>
-
-      <div class="copy-toolbar">
-        <div class="field copy-search">
-          <label for="copy-search">Buscar un texto</label>
-          <input type="search" id="copy-search" placeholder="Ej: garantía, botón, fundadora…" autocomplete="off">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Roles</h2>
+          <button type="button" class="btn btn-solid btn-sm" id="new-role-btn">+ Crear rol</button>
+        </div>
+        <div id="role-editor-slot"></div>
+        <div class="data-list" id="roles-list">
+          <div class="empty-state">Cargando roles…</div>
         </div>
       </div>
-
-      <div class="tabs" id="copy-tabs" role="group" aria-label="Páginas del sitio"></div>
-      <p class="copy-group-meta" id="copy-group-meta" aria-live="polite"></p>
-
-      <form id="copy-form" novalidate>
-        <div id="copy-groups">
-          <div class="empty-state">Cargando textos…</div>
-        </div>
-
-        <div class="save-bar" id="save-bar" hidden>
-          <p id="save-bar-text" role="status"></p>
-          <div class="save-bar-actions">
-            <button type="button" class="btn btn-ghost btn-sm" id="discard-btn">Descartar</button>
-            <button type="submit" class="btn btn-solid btn-sm" id="save-btn">Guardar cambios</button>
-          </div>
-        </div>
-      </form>
     </main>
   </div>
 </div>
 
+
 <script src="/js/main.js"></script>
-<script src="/js/copy-fields.js"></script>
-<script src="/js/contenido.js"></script>
+<script src="/js/crm-admin.js"></script>
+<script src="/js/crm-roles.js"></script>
 </body>
 </html>

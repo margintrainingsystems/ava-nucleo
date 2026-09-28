@@ -13,6 +13,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // La dirección de Netlify sigue funcionando aunque se conecte el dominio propio.
 const NUCLEO_SITE_URL = 'https://aprendeconava.netlify.app';
 
+// Dirección del CRM (Mensajes, Personas y el trabajo del equipo).
+const NUCLEO_CRM_URL = 'https://ava-crm.netlify.app';
+
 // Editar o borrar con .select('id') y pasar la respuesta por acá: si las
 // reglas de la base no dejaron tocar la fila (sesión vencida, fila borrada),
 // Supabase no da error pero no cambia nada; así se avisa en vez de mostrar "guardado".

@@ -77,6 +77,13 @@
     });
   }
 
+  /* ---------- Links al CRM ---------- */
+  if (typeof NUCLEO_CRM_URL !== 'undefined') {
+    document.querySelectorAll('[data-crm-link]').forEach((a) => {
+      a.href = NUCLEO_CRM_URL + (a.dataset.crmLink || '/');
+    });
+  }
+
   /* ---------- Cerrar sesión ---------- */
   document.querySelectorAll('[data-logout]').forEach((btn) => {
     btn.addEventListener('click', async () => {

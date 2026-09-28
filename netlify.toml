@@ -19,3 +19,16 @@
   to = "/404.html"
   status = 404
   force = true
+
+# Mensajes se mudó al CRM: los links viejos siguen funcionando.
+[[redirects]]
+  from = "/mensajes.html"
+  to = "https://ava-crm.netlify.app/mensajes"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/mensajes"
+  to = "https://ava-crm.netlify.app/mensajes"
+  status = 301
+  force = true

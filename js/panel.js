@@ -56,6 +56,20 @@
       set('tile-mensajes', 'Contacto y lista de espera.');
     }
 
+    // Resumen del CRM: personas del equipo (sin contar a la propietaria) y roles.
+    const [crmTeam, crmRoles] = await Promise.all([
+      supabaseClient.from('crm_members').select('user_id', { count: 'exact', head: true }).eq('is_owner', false),
+      supabaseClient.from('crm_roles').select('id', { count: 'exact', head: true }),
+    ]).catch(() => []);
+    if (crmTeam && !crmTeam.error) {
+      const n = crmTeam.count || 0;
+      set('tile-equipo', n === 0 ? 'Todavía no invitaste a nadie al CRM.' : n === 1 ? '1 persona en el equipo.' : `${n} personas en el equipo.`);
+    }
+    if (crmRoles && !crmRoles.error) {
+      const n = crmRoles.count || 0;
+      set('tile-roles', n === 0 ? 'Todavía no creaste roles.' : n === 1 ? '1 rol creado.' : `${n} roles creados.`);
+    }
+
     if (social && !social.error) {
       const n = social.count || 0;
       set('tile-redes', n === 0 ? 'Todavía no cargaste redes: el sitio no muestra el bloque.' : n === 1 ? '1 red publicada.' : `${n} redes publicadas.`);
