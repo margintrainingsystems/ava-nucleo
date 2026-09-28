@@ -15,7 +15,7 @@
     Inicio: '/', 'Sobre AVA': '/sobre-ava', 'Propuesta académica': '/propuesta-academica',
     Suscripción: '/suscripcion', Reseñas: '/resenas', Contacto: '/contacto',
     Privacidad: '/privacidad', 'Términos y condiciones': '/terminos', 'Menú y pie de página': '/',
-    'Arrepentimiento y baja': '/arrepentimiento', 'Autorización para menores': '/autorizacion-menores',
+    'Arrepentimiento y baja': '/arrepentimiento',
   };
   // Campos que tienen que ser un link completo (o quedar vacíos).
   const URL_KEYS = new Set(['campus_url']);

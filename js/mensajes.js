@@ -84,6 +84,7 @@
       l.country ? ['País', esc(l.country)] : null,
       l.motivo ? [request ? 'Operación' : 'Motivo', esc(l.motivo)] : null,
       request ? null : ['Privacidad', l.privacy_consent ? 'Marcó la casilla (consentimiento expreso)' : 'Sin casilla: llegó antes de que existiera'],
+      l.source === 'suscripcion' ? ['Mayor de 18', l.adult_confirmed ? 'Sí, lo declaró' : 'Sin declarar: llegó antes de que existiera la casilla'] : null,
       l.source === 'suscripcion' ? ['Publicar su nombre si gana', l.publish_consent ? 'Sí, lo autorizó' : 'No autorizado'] : null,
       ['Llegó', fmtDate(l.created_at)],
       request ? ['Plazo', requestStatus(l)] : null,
