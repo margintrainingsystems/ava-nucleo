@@ -14,6 +14,7 @@ Panel privado de la dueña para administrar todo AVA: el sitio y el CRM. Es una 
 | **WhatsApp** | Números por área (el primero válido es el del botón flotante) | Contacto y botón flotante |
 | **Email** | Direcciones por área (la primera válida es la principal) | Contacto, Privacidad y datos para Google |
 | **Redes** | Nombre y link de cada red, en el orden que quieras | Pie de todas las páginas, Contacto y datos para Google |
+| **Cursos del Campus** | Cursos (Máster o de regalo, dirección, publicado o borrador), módulos, clases (video de YouTube oculto, duración, texto) y materiales, en español, inglés y portugués. También los nombres de los Másteres en inglés y portugués | Campus (`https://ava-campus.netlify.app`, repo `ava-campus`) |
 | **CRM → Mensajes** | Abre el CRM en otra pestaña. El menú muestra cuántos mensajes hay sin leer | CRM |
 | **CRM → Equipo** | Invitar personas al CRM, cambiar su nombre y rol, reenviar invitaciones, desactivar, reactivar y quitar | CRM |
 | **CRM → Roles y permisos** | Crear, editar y borrar roles; elegir sus permisos (los sensibles van marcados) | CRM |
@@ -21,6 +22,13 @@ Panel privado de la dueña para administrar todo AVA: el sitio y el CRM. Es una 
 | **CRM → Cupo, dólar y emails** | Abre CRM → Configuración: abrir y cerrar inscripciones, el cupo de suscripciones anuales, la cotización del dólar blue (se lee sola de dolarhoy.com y se puede cargar a mano), remitente, plantillas y email de prueba. Se puede delegar con el permiso "Editar la configuración" | CRM y, en la fase 4 parte 2, la página de Suscripción |
 | **CRM → Feriados** | Los días que no cuentan como hábiles. Se pegan varios juntos (uno por renglón). Al cargar o borrar uno, el CRM recalcula los plazos pendientes | Plazos de los pedidos de datos en el CRM |
 | **Ajustes** | Cambiar la contraseña | — |
+
+## Núcleo y el Campus
+
+- **El Campus** (`https://ava-campus.netlify.app`, repo `ava-campus`) es donde estudian los alumnos. El acceso lo da la suscripción registrada en el CRM.
+- En **Cursos del Campus** se carga todo el contenido. Un curso nuevo queda como borrador: solo lo ven las cuentas de Núcleo (también desde el Campus, para revisarlo) hasta que se publica.
+- Cada texto tiene español (obligatorio), inglés y portugués. Si falta un idioma, el Campus muestra el español.
+- Si cambia la dirección del Campus, actualizá `NUCLEO_CAMPUS_URL` en `js/supabase-client.js`.
 
 ## Núcleo y el CRM
 
@@ -60,6 +68,7 @@ El panel ya no tiene pantalla para crear cuentas. Para que tampoco se puedan cre
 ├── index.html · login.html · reset-password.html · 404.html
 ├── panel.html · contenido.html · resenas.html
 ├── equipo.html · roles.html · auditoria.html · feriados.html   Administración del CRM
+├── campus.html                                                Cursos del Campus
 ├── masteres.html · precios.html · faq.html · whatsapp.html · email.html · redes.html · ajustes.html
 ├── css/base.css      Compartido con el sitio (colores, tipografía, botones)
 ├── css/nucleo.css    Estructura y componentes del panel
@@ -67,7 +76,8 @@ El panel ya no tiene pantalla para crear cuentas. Para que tampoco se puedan cre
     ├── supabase-client.js · guard.js · main.js   Conexión, permiso de admin, menú y avisos
     ├── copy-fields.js     Lista de todos los textos editables del sitio (claves de site_copy)
     ├── contenido.js       Editor de textos
-    ├── list-editor.js     Editor compartido de Másteres, preguntas, WhatsApp, Email y Redes
+    ├── list-editor.js     Editor compartido de Másteres, preguntas, WhatsApp, Email, Redes y el Campus
+    ├── campus-admin.js    Cursos, módulos, clases y materiales del Campus
     ├── crm-admin.js       Utilidades del CRM: fechas, invitaciones, permisos y textos de la auditoría
     ├── crm-equipo.js · crm-roles.js · crm-auditoria.js · crm-feriados.js
     └── (un archivo por sección)

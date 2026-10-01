@@ -16,6 +16,9 @@ const NUCLEO_SITE_URL = 'https://aprendeconava.netlify.app';
 // Dirección del CRM (Mensajes, Personas y el trabajo del equipo).
 const NUCLEO_CRM_URL = 'https://ava-crm.netlify.app';
 
+// Dirección del Campus, donde estudian los alumnos (repo ava-campus).
+const NUCLEO_CAMPUS_URL = 'https://ava-campus.netlify.app';
+
 // Editar o borrar con .select('id') y pasar la respuesta por acá: si las
 // reglas de la base no dejaron tocar la fila (sesión vencida, fila borrada),
 // Supabase no da error pero no cambia nada; así se avisa en vez de mostrar "guardado".

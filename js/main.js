@@ -84,6 +84,15 @@
     });
   }
 
+  /* ---------- Links al Campus ---------- */
+  if (typeof NUCLEO_CAMPUS_URL !== 'undefined') {
+    document.querySelectorAll('[data-campus-link]').forEach((a) => {
+      a.href = NUCLEO_CAMPUS_URL + (a.dataset.campusLink || '/');
+      a.target = '_blank';
+      a.rel = 'noopener';
+    });
+  }
+
   /* ---------- Cerrar sesión ---------- */
   document.querySelectorAll('[data-logout]').forEach((btn) => {
     btn.addEventListener('click', async () => {

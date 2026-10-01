@@ -26,14 +26,32 @@
    *   newItem(items) → valores iniciales de un ítem nuevo
    *   deleteText(item) → pregunta de confirmación · newTitle → título del ítem nuevo
    *   emptyText, savedText, deletedText, canDelete (true por defecto)
+   *   orderField → columna del orden ('order_index' por defecto)
+   *   filter() → { column, value } para mostrar solo una parte de la tabla (por ejemplo, las
+   *              clases de un módulo), o null mientras no haya nada elegido (opcional)
+   *   pickText → texto mientras filter() devuelve null (opcional)
    * }
+   * Devuelve { reload } para volver a cargar la lista (por ejemplo, al cambiar el filtro).
    */
   window.nucleoListEditor = function (cfg) {
     let items = [];
     const openEditors = new Map(); // id → { initial, form }
+    const orderField = cfg.orderField || 'order_index';
 
     async function load() {
-      const { data, error } = await supabaseClient.from(cfg.table).select('*').order('order_index', { ascending: true });
+      const scope = cfg.filter ? cfg.filter() : null;
+      if (cfg.filter && !scope) {
+        items = [];
+        openEditors.clear();
+        updateDirty();
+        if (cfg.addBtn) cfg.addBtn.hidden = true;
+        cfg.listEl.innerHTML = `<div class="empty-state">${esc(cfg.pickText || '')}</div>`;
+        return;
+      }
+      if (cfg.addBtn) cfg.addBtn.hidden = false;
+      let query = supabaseClient.from(cfg.table).select('*');
+      if (scope) query = query.eq(scope.column, scope.value);
+      const { data, error } = await query.order(orderField, { ascending: true });
       if (error || !data) {
         cfg.listEl.innerHTML = '<div class="empty-state">No pudimos cargar la lista. Recargá la página para intentar de nuevo.</div>';
         return;
@@ -198,8 +216,11 @@
         let error = null;
         try {
           if ('draft' in row.dataset) {
-            const order = items.length ? Math.max(...items.map((x) => x.order_index)) + 1 : 1;
-            ({ error } = await supabaseClient.from(cfg.table).insert(Object.assign({ order_index: order }, record)));
+            const order = items.length ? Math.max(...items.map((x) => x[orderField])) + 1 : 1;
+            const scope = cfg.filter ? cfg.filter() : null;
+            const base = { [orderField]: order };
+            if (scope) base[scope.column] = scope.value;
+            ({ error } = await supabaseClient.from(cfg.table).insert(Object.assign(base, record)));
           } else {
             ({ error } = await window.nucleoRows(await supabaseClient.from(cfg.table).update(record).eq('id', item.id).select('id')));
           }
@@ -239,10 +260,10 @@
       [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
       const changes = reordered
         .map((item, i) => ({ item, order: i + 1 }))
-        .filter(({ item, order }) => item.order_index !== order);
+        .filter(({ item, order }) => item[orderField] !== order);
       try {
         const results = await Promise.all(
-          changes.map(({ item, order }) => supabaseClient.from(cfg.table).update({ order_index: order }).eq('id', item.id).select('id').then(window.nucleoRows))
+          changes.map(({ item, order }) => supabaseClient.from(cfg.table).update({ [orderField]: order }).eq('id', item.id).select('id').then(window.nucleoRows))
         );
         if (results.some((r) => r.error)) throw new Error('reorder');
       } catch (e) {
@@ -250,7 +271,7 @@
         await load();
         return;
       }
-      changes.forEach(({ item, order }) => (item.order_index = order));
+      changes.forEach(({ item, order }) => (item[orderField] = order));
       items = reordered;
       if (cfg.onLoad) cfg.onLoad(items);
       render();
@@ -317,5 +338,7 @@
     window.nucleoReady.then((session) => {
       if (session) load();
     });
+
+    return { reload: load };
   };
 })();
